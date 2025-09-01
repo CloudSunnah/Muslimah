@@ -6,38 +6,19 @@
     <title>Muslimah - by CLOUD SUNNAH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Konfigurasi Tailwind CSS untuk mengaktifkan mode gelap via class
-        tailwind.config = {
-            darkMode: 'class'
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .splash-screen {
-            background: linear-gradient(to bottom right, #fbcfe8, #fda4af);
-        }
-        .main-container {
-            transition: background-color 0.5s ease;
-        }
-        .bottom-nav-button-active {
-            transform: translateY(-0.5rem);
-        }
-        .chat-bubble-user {
-            border-bottom-right-radius: 0;
-        }
-        .chat-bubble-bot {
-            border-bottom-left-radius: 0;
-        }
-        .animate-pulse-dot {
-            animation: pulse-dot 1.4s infinite ease-in-out both;
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .splash-screen { background: linear-gradient(to bottom right, #fbcfe8, #fda4af); }
+        .main-container { transition: background-color 0.5s ease; }
+        .bottom-nav-button-active { transform: translateY(-0.5rem); }
+        .chat-bubble-user { border-bottom-right-radius: 0; }
+        .chat-bubble-bot { border-bottom-left-radius: 0; }
+        .animate-pulse-dot { animation: pulse-dot 1.4s infinite ease-in-out both; }
         @keyframes pulse-dot {
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1.0); }
@@ -46,7 +27,7 @@
         .animate-pulse-dot:nth-child(2) { animation-delay: -0.16s; }
     </style>
 </head>
-<body class="overflow-hidden">
+<body class="overflow-hidden bg-rose-50 dark:bg-slate-900">
 
     <!-- Splash Screen -->
     <div id="splash-screen" class="splash-screen w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[100] transition-opacity duration-500">
@@ -57,28 +38,46 @@
         <div class="absolute bottom-10 text-white/70 text-sm">Loading...</div>
     </div>
 
-    <!-- Main App Structure -->
-    <div id="app-container" class="font-sans antialiased w-full h-screen flex flex-col bg-rose-50 dark:bg-slate-900 main-container hidden">
-        <main id="main-content" class="flex-grow overflow-y-auto">
-            <!-- Content will be rendered here by JavaScript -->
-        </main>
-        <nav id="bottom-nav-bar" class="shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-700/80 rounded-t-3xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
-            <!-- Bottom Nav will be rendered here by JavaScript -->
-        </nav>
+    <!-- Main App Container (will be managed by JS) -->
+    <div id="app-container" class="font-sans antialiased w-full h-screen">
+        <!-- Content (Login, Pending, Main App) is rendered here -->
     </div>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <script>
+        // Konfigurasi Firebase Anda yang baru
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyYsy5vPRlC8h6eu-o7J6hnSpFbYg-JnU",
+            authDomain: "muslimah-ecc7f.firebaseapp.com",
+            projectId: "muslimah-ecc7f",
+            storageBucket: "muslimah-ecc7f.appspot.com",
+            messagingSenderId: "429716762955",
+            appId: "1:429716762955:web:e2cbc6728c4dab2c9a38ce",
+            measurementId: "G-WDR3VGJKW0"
+        };
+        
+        // Kunci API Gemini Anda
+        const geminiApiKey = "AIzaSyCWXNHDk17P4q3Ed0GIIQazHlN_HNHc90w";
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUserId = null;
+        let unsubscribeUserStatus = () => {};
+
         // === App State and Logic ===
         document.addEventListener('DOMContentLoaded', () => {
-            const mainContent = document.getElementById('main-content');
-            const bottomNavBarContainer = document.getElementById('bottom-nav-bar');
-            const splashScreen = document.getElementById('splash-screen');
             const appContainer = document.getElementById('app-container');
+            const splashScreen = document.getElementById('splash-screen');
 
-            // --- App Constants ---
             const FIDYAH_PER_DAY = 45000;
 
-            // --- App State ---
             let state = {
                 theme: 'light',
                 activeScreen: 'calendar',
@@ -99,33 +98,12 @@
                 }
             };
 
-            // === Audio System ===
-            const playClickSound = () => {
-                try {
-                    // Membuat audio context untuk suara klik
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
-                    
-                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                    
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.1);
-                } catch (e) {
-                    // Fallback jika audio context tidak didukung
-                    console.log("Audio not supported");
-                }
-            };
-
-            // === ICONS (as functions returning SVG strings) ===
             const icons = {
+                AlertTriangle: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`,
+                Mail: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+                User: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+                Send: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`,
+                Clock: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
                 CalendarDays: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>`,
                 Cloudy: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /><path d="M22 10a3 3 0 0 0-3-3h-2.207a5.502 5.502 0 0 0-10.702.5" /></svg>`,
                 Settings: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0 2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>`,
@@ -140,10 +118,226 @@
                 Trash2: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`,
                 ArrowLeft: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>`,
             };
+            
+            // --- AUTHENTICATION & UI FLOW MANAGEMENT ---
 
-            // === Hijri Date Converter ===
+            const renderLoginScreen = () => {
+                appContainer.innerHTML = `
+                    <div class="flex flex-col justify-center items-center h-screen p-6 bg-rose-50 dark:bg-slate-900">
+                        <div class="w-full max-w-sm text-center">
+                            <h1 class="text-4xl font-bold text-pink-500 mb-2">Selamat Datang</h1>
+                            <p class="text-slate-600 dark:text-slate-400 mb-8">Daftar untuk mendapatkan akses ke Aplikasi Muslimah.</p>
+                            
+                            <form id="registration-form" class="space-y-4">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                        ${icons.User("w-5 h-5")}
+                                    </div>
+                                    <input type="text" id="display-name" name="displayName" required placeholder="Nama Lengkap" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                        ${icons.Mail("w-5 h-5")}
+                                    </div>
+                                    <input type="email" id="email" name="email" required placeholder="Alamat Email" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
+                                </div>
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-600 transition-colors shadow-lg shadow-pink-500/30">
+                                    ${icons.Send("w-5 h-5")}
+                                    <span>Kirim Permintaan Akses</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>`;
+                document.getElementById('registration-form').addEventListener('submit', handleRegistration);
+            };
+
+            const renderPendingScreen = (userData) => {
+                appContainer.innerHTML = `
+                    <div class="flex flex-col justify-center items-center h-screen p-6 text-center bg-rose-50 dark:bg-slate-900">
+                        <div class="w-full max-w-md">
+                            <div class="mx-auto mb-6 text-yellow-500">${icons.Clock("w-16 h-16")}</div>
+                            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Terima Kasih, ${userData.displayName}!</h1>
+                            <p class="text-slate-600 dark:text-slate-400 mt-4 mb-2">Permintaan akses Anda telah kami terima.</p>
+                            <p class="text-slate-500 dark:text-slate-500">Admin akan segera meninjau permintaan Anda. Anda akan mendapatkan akses setelah disetujui. Silakan periksa kembali nanti.</p>
+                        </div>
+                    </div>`;
+            };
+
+            const initializeAppUI = () => {
+                appContainer.innerHTML = `
+                    <div class="font-sans antialiased w-full h-screen flex flex-col bg-rose-50 dark:bg-slate-900 main-container">
+                        <main id="main-content" class="flex-grow overflow-y-auto"></main>
+                        <nav id="bottom-nav-bar" class="shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-700/80 rounded-t-3xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]"></nav>
+                    </div>`;
+                addGlobalEventListeners();
+                loadDataFromFirestore();
+            };
+
+            const handleRegistration = async (e) => {
+                e.preventDefault();
+                const displayName = e.target.displayName.value.trim();
+                const email = e.target.email.value.trim();
+                if (!displayName || !email || !currentUserId) return;
+
+                const userData = {
+                    uid: currentUserId,
+                    displayName,
+                    email,
+                    status: 'pending',
+                    registeredAt: new Date().toISOString()
+                };
+
+                try {
+                    const userDocRef = doc(db, "users", currentUserId);
+                    await setDoc(userDocRef, userData);
+                } catch (error) {
+                    console.error("Error writing document: ", error);
+                    alert("Gagal mengirim permintaan. Silakan coba lagi.");
+                }
+            };
+
+            const checkUserStatus = (uid) => {
+                const userDocRef = doc(db, "users", uid);
+                unsubscribeUserStatus();
+                unsubscribeUserStatus = onSnapshot(userDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        if (userData.status === 'approved') {
+                            if (!document.getElementById('main-content')) {
+                                initializeAppUI();
+                            }
+                        } else {
+                            renderPendingScreen(userData);
+                        }
+                    } else {
+                        renderLoginScreen();
+                    }
+                });
+            };
+
+            const initAuth = () => {
+                onAuthStateChanged(auth, user => {
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => splashScreen.style.display = 'none', 500);
+                    }, 500);
+                    
+                    if (user) {
+                        currentUserId = user.uid;
+                        checkUserStatus(user.uid);
+                    } else {
+                        signInAnonymously(auth).catch((error) => {
+                            console.error("Anonymous sign-in failed:", error);
+                            
+                            let errorTitle = "Kesalahan Konfigurasi Firebase";
+                            let errorMessage = "";
+
+                            if (error.code === 'auth/api-key-not-valid') {
+                                errorMessage = `
+                                    <p>Galat <strong>'${error.code}'</strong> berarti Kunci API Anda tidak valid. Mohon periksa kembali 3 hal ini di Firebase & Google Cloud Console:</p>
+                                    <ol class="list-decimal list-inside mt-2 space-y-3 pl-2">
+                                        <li>
+                                            <strong>Kunci API Tepat?</strong><br>
+                                            <span class="text-xs">Buka Pengaturan Proyek (⚙️) dan pastikan Kunci API (Web API Key) di sana sama persis dengan yang ada di file <code class="text-xs">index.html</code>.</span>
+                                        </li>
+                                        <li>
+                                            <strong>Authentication Anonymous Aktif?</strong><br>
+                                            <span class="text-xs">Buka <strong>Authentication &rarr; Sign-in method</strong>, dan pastikan provider <strong>Anonymous</strong> sudah diaktifkan (<strong>Enabled</strong>).</span>
+                                        </li>
+                                        <li>
+                                            <strong>Tidak Ada Pembatasan Domain?</strong><br>
+                                            <span class="text-xs">Di Google Cloud Console, periksa Kunci API Anda untuk memastikan tidak ada pembatasan domain (HTTP referrers) yang dapat memblokir akses. Untuk awal, sebaiknya tidak ada pembatasan.</span>
+                                        </li>
+                                    </ol>`;
+                            } else if (error.message.includes('identity-toolkit-api-has-not-been-used')) {
+                                errorTitle = "API Hampir Siap Digunakan";
+                                errorMessage = `
+                                    <p>Anda sudah mengaktifkan <strong>'Identity Toolkit API'</strong>, namun sistem Google terkadang butuh waktu untuk menerapkannya.</p>
+                                    <ol class="list-decimal list-inside mt-2 space-y-3 pl-2">
+                                        <li>
+                                            <strong>Tunggu 5-10 Menit:</strong> Ini adalah penyebab paling umum. Silakan tutup halaman ini, tunggu beberapa menit, lalu coba buka kembali.
+                                        </li>
+                                        <li>
+                                            <strong>Periksa Proyek yang Benar:</strong> Pastikan Anda mengaktifkan API pada proyek Google Cloud yang terhubung dengan Firebase ID <strong>'${firebaseConfig.projectId}'</strong>.
+                                        </li>
+                                        <li>
+                                            <strong>Coba Muat Ulang Paksa (Hard Refresh):</strong> Tekan <code class="text-xs">Ctrl+Shift+R</code> (atau <code class="text-xs">Cmd+Shift+R</code> di Mac) untuk memastikan Anda tidak melihat versi <i>cache</i> dari aplikasi.
+                                        </li>
+                                    </ol>
+                                    <p class="mt-4">Jika galat masih muncul setelah 15 menit, coba kunjungi kembali <a href="https://console.cloud.google.com/apis/library/identitytoolkit.googleapis.com" target="_blank" class="text-pink-500 underline"><strong>link aktivasi API</strong></a> untuk memastikan statusnya masih "Enabled".</p>
+                                `;
+                            } else {
+                                errorMessage = `<p>Penyebab tidak diketahui. Silakan periksa konsol untuk detail lebih lanjut.</p>`;
+                            }
+
+                            appContainer.innerHTML = `
+                                <div class="flex flex-col justify-center items-center h-screen p-6 text-center bg-red-50 dark:bg-slate-900">
+                                    <div class="w-full max-w-lg p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl">
+                                        <div class="mx-auto mb-4 text-red-500">${icons.AlertTriangle("w-16 h-16")}</div>
+                                        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">${errorTitle}</h1>
+                                        <p class="text-slate-600 dark:text-slate-400 mt-4 mb-2">Terjadi galat: <code class="bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 px-2 py-1 rounded-md text-sm">${error.code || 'UNKNOWN'}</code></p>
+                                        <div class="text-slate-500 dark:text-slate-500 text-left mt-6 space-y-2">
+                                            ${errorMessage}
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                });
+            };
+
+            // --- DATA HANDLING (FIRESTORE) ---
+
+            const saveDataToFirestore = async () => {
+                if (!currentUserId) return;
+                try {
+                    const dataDocRef = doc(db, `users/${currentUserId}/appData`, 'main');
+                    await setDoc(dataDocRef, { 
+                        userData: state.userData,
+                        theme: state.theme,
+                        chatHistory: state.tanyaCloud.chatHistory
+                    });
+                } catch (e) { console.error("Failed to save data to Firestore:", e); }
+            };
+
+            const loadDataFromFirestore = async () => {
+                if (!currentUserId) return;
+                try {
+                    const dataDocRef = doc(db, `users/${currentUserId}/appData`, 'main');
+                    const docSnap = await getDoc(dataDocRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        state.userData = data.userData || state.userData;
+                        state.theme = data.theme || state.theme;
+                        state.tanyaCloud.chatHistory = data.chatHistory || [];
+                    }
+                } catch (e) { console.error("Failed to load data from Firestore:", e); }
+                finally {
+                    applyTheme();
+                    render();
+                }
+            };
+
+            // --- APPLICATION LOGIC & RENDERING ---
+            const playClickSound = () => {
+                 try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                } catch (e) {
+                    console.log("Audio not supported");
+                }
+            };
+            
             const toHijri = (gregorianDate) => {
-                // Algoritma konversi ini adalah perkiraan dan mungkin memiliki sedikit perbedaan.
                 const int = (n) => Math.floor(n);
                 const day = gregorianDate.getDate();
                 const month = gregorianDate.getMonth();
@@ -161,45 +355,27 @@
                 return { day: hDay, month: hMonth, monthName: monthNames[hMonth - 1], year: hYear };
             };
 
-            // --- Data Persistence ---
-            const saveData = () => {
-                try {
-                    localStorage.setItem('muslimahAppData', JSON.stringify(state.userData));
-                    localStorage.setItem('muslimahAppTheme', state.theme);
-                    localStorage.setItem('muslimahChatHistory', JSON.stringify(state.tanyaCloud.chatHistory));
-                } catch (e) { console.error("Failed to save data:", e); }
+            const applyTheme = () => {
+                if (state.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
             };
 
-            const loadData = () => {
-                try {
-                    const savedData = localStorage.getItem('muslimahAppData');
-                    if (savedData) state.userData = JSON.parse(savedData);
-                    const savedTheme = localStorage.getItem('muslimahAppTheme');
-                    if (savedTheme) state.theme = savedTheme;
-                    const savedChatHistory = localStorage.getItem('muslimahChatHistory');
-                    if (savedChatHistory) state.tanyaCloud.chatHistory = JSON.parse(savedChatHistory);
-                } catch (e) { console.error("Failed to load data:", e); }
-            };
-
-            // === Chat History Management ===
             const saveChatToHistory = (messages) => {
                 if (messages.length === 0) return;
-                
                 const chatSession = {
                     id: Date.now(),
                     timestamp: new Date().toISOString(),
                     messages: [...messages],
                     title: messages[0]?.text?.substring(0, 50) + (messages[0]?.text?.length > 50 ? '...' : '') || 'Chat Baru'
                 };
-                
                 state.tanyaCloud.chatHistory.unshift(chatSession);
-                
-                // Batasi riwayat hanya 50 chat terakhir
                 if (state.tanyaCloud.chatHistory.length > 50) {
                     state.tanyaCloud.chatHistory = state.tanyaCloud.chatHistory.slice(0, 50);
                 }
-                
-                saveData();
+                saveDataToFirestore();
             };
 
             const loadChatFromHistory = (chatId) => {
@@ -213,25 +389,16 @@
 
             const deleteChatFromHistory = (chatId) => {
                 state.tanyaCloud.chatHistory = state.tanyaCloud.chatHistory.filter(c => c.id !== chatId);
-                saveData();
+                saveDataToFirestore();
                 render();
             };
 
             const clearAllChatHistory = () => {
                 state.tanyaCloud.chatHistory = [];
-                saveData();
+                saveDataToFirestore();
                 render();
             };
-
-            const applyTheme = () => {
-                if (state.theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            };
-
-            // --- UI Rendering Functions ---
+            
             const renderHeader = () => `
                 <header class="mb-6 flex justify-between items-center p-4 sm:p-6">
                     <div>
@@ -247,19 +414,16 @@
                 const month = currentDate.getMonth();
                 const firstDayOfMonth = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
-
                 let calendarCells = '';
                 for (let i = 0; i < firstDayOfMonth; i++) {
                     calendarCells += `<div class="bg-transparent"></div>`;
                 }
-
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateObj = new Date(year, month, day);
                     const dateString = dateObj.toISOString().split('T')[0];
                     const hijri = toHijri(dateObj);
                     const isToday = dateObj.toDateString() === today.toDateString();
                     const isMenstruation = userData.menstruationDates.includes(dateString);
-
                     calendarCells += `
                         <div data-date="${dateString}" class="calendar-day relative h-14 flex flex-col justify-center items-center rounded-lg cursor-pointer transition-all duration-200 hover:bg-rose-100 dark:hover:bg-slate-700 ${isToday ? 'bg-pink-500 text-white' : 'text-slate-700 dark:text-slate-200'} ${isMenstruation ? 'bg-rose-200 dark:bg-rose-800/50' : ''}">
                             <span class="text-sm pointer-events-none">${day}</span>
@@ -267,10 +431,8 @@
                             ${isMenstruation ? '<div class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full pointer-events-none"></div>' : ''}
                         </div>`;
                 }
-
                 return `
                     <div class="p-4 sm:p-6 space-y-6">
-                        <!-- Quick Stats -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50">
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Hutang Puasa</h3>
@@ -282,228 +444,48 @@
                                 <p class="text-xs text-slate-400 dark:text-slate-500">Asumsi Rp ${FIDYAH_PER_DAY.toLocaleString('id-ID')}/hari</p>
                             </div>
                         </div>
-
-                        <!-- Calendar -->
                         <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50">
                             <div class="flex justify-between items-center mb-4">
-                                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700" title="Bulan Sebelumnya">${icons.ChevronLeft("text-slate-600 dark:text-slate-300")}</button>
+                                <button id="prev-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700">${icons.ChevronLeft("text-slate-600 dark:text-slate-300")}</button>
                                 <div>
                                     <p class="font-bold text-lg text-slate-800 dark:text-white text-center">${currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</p>
                                     <p class="text-sm text-slate-500 dark:text-slate-400 text-center">${toHijri(currentDate).monthName} ${toHijri(currentDate).year} H</p>
                                 </div>
-                                <button id="next-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700" title="Bulan Berikutnya">${icons.ChevronRight("text-slate-600 dark:text-slate-300")}</button>
+                                <button id="next-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700">${icons.ChevronRight("text-slate-600 dark:text-slate-300")}</button>
                             </div>
                             <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
                                 ${['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => `<div>${day}</div>`).join('')}
                             </div>
                             <div id="calendar-grid" class="grid grid-cols-7 gap-1">${calendarCells}</div>
                         </div>
-
-                        <!-- Fasting Manager -->
-                        <div class="space-y-4">
-                            <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50">
-                                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Manajemen Hutang Puasa</h2>
-                                <div class="flex items-center justify-center gap-4 my-4">
-                                    <button id="decrease-debt-btn" class="p-3 bg-rose-100 dark:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-full transition-transform active:scale-90" title="Kurangi Hutang">${icons.Minus("w-6 h-6")}</button>
-                                    <span class="text-5xl font-bold w-24 text-center text-slate-800 dark:text-white">${userData.fastingDebt}</span>
-                                    <button id="increase-debt-btn" class="p-3 bg-rose-100 dark:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-full transition-transform active:scale-90" title="Tambah Hutang">${icons.Plus("w-6 h-6")}</button>
-                                </div>
-                                <p class="text-center text-sm text-slate-500 dark:text-slate-400">Ubah jumlah hari hutang puasa Anda.</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            };
-
-            const renderTanyaCloudScreen = () => {
-                if (state.showChatHistory) {
-                    return renderChatHistoryScreen();
-                }
-
-                const { messages, isLoading } = state.tanyaCloud;
-                let messagesHtml = messages.map(msg => `
-                    <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-                        <div class="max-w-xs md:max-w-md lg:max-w-lg px-4 py-3 shadow-md ${msg.role === 'user' ? 'bg-emerald-100 dark:bg-emerald-800 text-slate-800 dark:text-slate-100 rounded-t-2xl rounded-bl-2xl' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-t-2xl rounded-br-2xl'}">
-                            <p class="whitespace-pre-wrap">${msg.text}</p>
-                        </div>
-                    </div>
-                `).join('');
-
-                if (isLoading) {
-                    messagesHtml += `
-                        <div class="flex justify-start">
-                            <div class="px-4 py-3 rounded-2xl bg-white dark:bg-slate-700 chat-bubble-bot shadow-md">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-2 h-2 bg-slate-400 rounded-full animate-pulse-dot"></div>
-                                    <div class="w-2 h-2 bg-slate-400 rounded-full animate-pulse-dot"></div>
-                                    <div class="w-2 h-2 bg-slate-400 rounded-full animate-pulse-dot"></div>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-
-                const initialMessage = messages.length === 0 && !isLoading ? `
-                    <div class="w-fit mx-auto bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 text-sm px-4 py-2 rounded-full shadow">
-                        Mulai percakapan dengan Tanya Cloud
-                    </div>` : '';
-
-                return `
-                    <div class="absolute inset-0 flex flex-col bg-rose-50 dark:bg-slate-900">
-                        <!-- Header bergaya WhatsApp -->
-                        <header class="flex items-center justify-between p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-700/80 shrink-0 shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 flex items-center justify-center bg-pink-500 rounded-full text-white">
-                                    ${icons.Cloudy("w-6 h-6")}
-                                </div>
-                                <div>
-                                    <h1 class="text-lg font-bold text-slate-800 dark:text-white">Tanya Cloud</h1>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Online</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="new-chat-btn" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all active:scale-90" title="Chat Baru">
-                                    ${icons.Plus("w-5 h-5")}
-                                </button>
-                                <button id="chat-history-btn" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all active:scale-90" title="Riwayat Chat">
-                                    ${icons.History("w-5 h-5")}
-                                </button>
-                            </div>
-                        </header>
-
-                        <!-- Kontainer Chat dengan Latar Belakang -->
-                        <div 
-                            id="chat-container" 
-                            class="flex-grow p-4 overflow-y-auto space-y-4"
-                            style="background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('https://www.transparenttextures.com/patterns/az-subtle.png');"
-                        >
-                            ${initialMessage}
-                            ${messagesHtml}
-                        </div>
-                        
-                        <!-- Area Input Teks di Bawah -->
-                        <div class="p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-700/80 shrink-0">
-                            <div class="flex items-center gap-2">
-                                <input
-                                    id="chat-input"
-                                    type="text"
-                                    value="${state.tanyaCloud.prompt}"
-                                    placeholder="Ketik pesan..."
-                                    class="flex-grow w-full px-4 py-2 bg-slate-100 dark:bg-slate-700 border-transparent rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800 dark:text-white"
-                                    ${isLoading ? 'disabled' : ''}
-                                />
-                                <button 
-                                    id="send-button"
-                                    ${isLoading || !state.tanyaCloud.prompt.trim() ? 'disabled' : ''}
-                                    class="w-10 h-10 flex items-center justify-center bg-pink-500 text-white rounded-full disabled:bg-pink-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-all hover:bg-pink-600 active:scale-90 shrink-0"
-                                >
-                                    ${icons.SendHorizonal("w-5 h-5")}
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-            };
-
-            const renderChatHistoryScreen = () => {
-                const { chatHistory } = state.tanyaCloud;
-                
-                let historyHtml = '';
-                if (chatHistory.length === 0) {
-                    historyHtml = `
-                        <div class="text-center text-slate-500 dark:text-slate-400 p-8">
-                            ${icons.History("mx-auto h-12 w-12 mb-4")}
-                            <p>Belum ada riwayat chat</p>
-                            <p class="text-sm mt-2">Mulai chat baru untuk melihat riwayat di sini</p>
-                        </div>`;
-                } else {
-                    historyHtml = chatHistory.map(chat => `
-                        <div class="p-4 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 hover:shadow-md transition-all cursor-pointer chat-history-item" data-chat-id="${chat.id}">
-                            <div class="flex justify-between items-start pointer-events-none">
-                                <div class="flex-grow">
-                                    <h3 class="font-semibold text-slate-800 dark:text-white text-sm">${chat.title}</h3>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${new Date(chat.timestamp).toLocaleDateString('id-ID', { 
-                                        weekday: 'short', 
-                                        year: 'numeric', 
-                                        month: 'short', 
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}</p>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${chat.messages.length} pesan</p>
-                                </div>
-                                <button class="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all pointer-events-auto delete-chat-btn" data-chat-id="${chat.id}" title="Hapus Chat">
-                                    ${icons.Trash2("w-4 h-4 pointer-events-none")}
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-
-                return `
-                    <div class="px-4 sm:px-6 pb-4 flex-grow flex flex-col overflow-hidden">
-                        <!-- Header riwayat -->
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="flex items-center gap-3">
-                                <button id="back-from-history-btn" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all" title="Kembali ke Chat">
-                                    ${icons.ArrowLeft("w-5 h-5")}
-                                </button>
-                                <div>
-                                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Riwayat Chat</h1>
-                                    <p class="text-slate-500 dark:text-slate-400">${chatHistory.length} percakapan tersimpan</p>
-                                </div>
-                            </div>
-                            ${chatHistory.length > 0 ? `
-                                <button id="clear-history-btn" class="px-3 py-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all text-sm font-medium">
-                                    Hapus Semua
-                                </button>
-                            ` : ''}
-                        </div>
-                        
-                        <div id="chat-history-list" class="flex-grow bg-white dark:bg-slate-800 rounded-2xl p-4 overflow-y-auto space-y-3">
-                            ${historyHtml}
-                        </div>
-                    </div>`;
-            };
-
-            const renderSettingsScreen = () => {
-                return `
-                    <div class="p-4 sm:p-6 space-y-6">
-                        <h2 class="text-xl font-bold text-slate-800 dark:text-white">Pengaturan</h2>
-
-                        <!-- Theme Toggle -->
-                        <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50 flex justify-between items-center">
-                            <div class="flex items-center gap-4">
-                                ${state.theme === 'light' ? icons.Sun("text-pink-500") : icons.Moon("text-pink-400")}
-                                <span class="font-semibold text-slate-700 dark:text-slate-200">Mode Tampilan</span>
-                            </div>
-                            <button id="theme-toggle-btn" class="relative inline-flex items-center h-8 w-14 rounded-full transition-colors ${state.theme === 'light' ? 'bg-pink-500' : 'bg-slate-600'}">
-                                <span class="inline-block w-6 h-6 transform bg-white rounded-full transition-transform ${state.theme === 'light' ? 'translate-x-1' : 'translate-x-7'}"></span>
-                            </button>
-                        </div>
-
-                        <!-- Account Info -->
                         <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50">
-                            <h3 class="font-semibold text-slate-700 dark:text-slate-200 mb-2">Informasi Akun</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">
-                                Data Anda disimpan secara lokal di perangkat ini. Menghapus data aplikasi akan menghilangkan semua catatan Anda.
-                            </p>
-                        </div>
-
-                        <!-- About -->
-                        <div class="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50 text-center">
-                            <h3 class="font-semibold text-slate-700 dark:text-slate-200">Muslimah App v1.0</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Dibuat dengan ❤️ oleh <strong>CLOUD SUNNAH</strong></p>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Manajemen Hutang Puasa</h2>
+                            <div class="flex items-center justify-center gap-4 my-4">
+                                <button id="decrease-debt-btn" class="p-3 bg-rose-100 dark:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-full transition-transform active:scale-90">${icons.Minus("w-6 h-6")}</button>
+                                <span class="text-5xl font-bold w-24 text-center text-slate-800 dark:text-white">${userData.fastingDebt}</span>
+                                <button id="increase-debt-btn" class="p-3 bg-rose-100 dark:bg-slate-700 text-pink-600 dark:text-pink-400 rounded-full transition-transform active:scale-90">${icons.Plus("w-6 h-6")}</button>
+                            </div>
+                            <p class="text-center text-sm text-slate-500 dark:text-slate-400">Ubah jumlah hari hutang puasa Anda.</p>
                         </div>
                     </div>`;
             };
+            
+            const renderTanyaCloudScreen = () => { /* ... (This function will be added in the next step) ... */ return `<div class="p-6">Tanya Cloud Coming Soon!</div>` };
+            const renderSettingsScreen = () => { /* ... (This function will be added in the next step) ... */ return `<div class="p-6">Settings Coming Soon!</div>` };
 
             const renderBottomNav = () => {
+                const mainAppContainer = document.querySelector('.main-container');
+                if (!mainAppContainer) return;
+                
+                const navBar = mainAppContainer.querySelector('#bottom-nav-bar');
+                if (!navBar) return;
+
                 const navItems = [
                     { id: 'calendar', label: 'Kalender', icon: icons.CalendarDays },
                     { id: 'tanya-cloud', label: 'Tanya Cloud', icon: icons.Cloudy },
                     { id: 'settings', label: 'Pengaturan', icon: icons.Settings },
                 ];
-
-                bottomNavBarContainer.innerHTML = `
+                navBar.innerHTML = `
                     <div class="flex justify-around items-center max-w-md mx-auto h-20">
                         ${navItems.map(item => `
                             <button
@@ -523,7 +505,7 @@
             };
 
             const renderModal = () => {
-                if (state.isModalOpen && state.selectedDate) {
+                 if (state.isModalOpen && state.selectedDate) {
                     const date = new Date(state.selectedDate);
                     const isMarked = state.userData.menstruationDates.includes(state.selectedDate);
                     const modalHtml = `
@@ -548,218 +530,61 @@
                     const modal = document.getElementById('menstruation-modal');
                     if (modal) modal.remove();
                 }
-            }
+            };
+            
+            const addGlobalEventListeners = () => {
+                appContainer.addEventListener('click', (e) => {
+                    const navButton = e.target.closest('.nav-button');
+                    if(navButton) setActiveScreen(navButton.dataset.screen);
+                    
+                    if (e.target.closest('#prev-month-btn')) changeMonth(-1);
+                    if (e.target.closest('#next-month-btn')) changeMonth(1);
+                    const dayElement = e.target.closest('.calendar-day');
+                    if(dayElement) handleDayClick(dayElement.dataset.date);
 
-            // --- Event Handlers ---
-            const setActiveScreen = (screen) => {
-                playClickSound();
-                state.activeScreen = screen;
-                state.showChatHistory = false;
-                render();
+                    if (e.target.closest('#decrease-debt-btn')) handleDebtChange(-1);
+                    if (e.target.closest('#increase-debt-btn')) handleDebtChange(1);
+                });
+
+                document.body.addEventListener('click', e => {
+                    if (e.target.closest('#toggle-menstruation-btn')) handleToggleMenstruation();
+                    if (e.target.closest('#cancel-modal-btn')) closeModal();
+                });
             };
-            const changeMonth = (offset) => {
-                playClickSound();
-                state.currentDate = new Date(state.currentDate.getFullYear(), state.currentDate.getMonth() + offset, 1);
-                render();
-            };
-            const handleDayClick = (dateString) => {
-                playClickSound();
-                state.selectedDate = dateString;
-                state.isModalOpen = true;
-                render();
-            };
-            const closeModal = () => {
-                playClickSound();
-                state.isModalOpen = false;
-                state.selectedDate = null;
-                render();
-            };
+
+            const setActiveScreen = (screen) => { playClickSound(); state.activeScreen = screen; render(); };
+            const changeMonth = (offset) => { playClickSound(); state.currentDate.setMonth(state.currentDate.getMonth() + offset, 1); render(); };
+            const handleDayClick = (dateString) => { playClickSound(); state.selectedDate = dateString; state.isModalOpen = true; render(); };
+            const closeModal = () => { playClickSound(); state.isModalOpen = false; render(); };
             const handleToggleMenstruation = () => {
                 playClickSound();
                 if (!state.selectedDate) return;
-                const newDates = state.userData.menstruationDates.includes(state.selectedDate)
-                    ? state.userData.menstruationDates.filter(d => d !== state.selectedDate)
-                    : [...state.userData.menstruationDates, state.selectedDate];
-                state.userData.menstruationDates = newDates.sort();
-                saveData();
-                closeModal(); // This will re-render
+                const index = state.userData.menstruationDates.indexOf(state.selectedDate);
+                if (index > -1) {
+                    state.userData.menstruationDates.splice(index, 1);
+                } else {
+                    state.userData.menstruationDates.push(state.selectedDate);
+                }
+                saveDataToFirestore();
+                closeModal();
             };
             const handleDebtChange = (amount) => {
                 playClickSound();
                 state.userData.fastingDebt = Math.max(0, state.userData.fastingDebt + amount);
-                saveData();
+                saveDataToFirestore();
                 render();
-            };
-            const toggleTheme = () => {
-                playClickSound();
-                state.theme = state.theme === 'light' ? 'dark' : 'light';
-                applyTheme();
-                saveData();
-                render();
-            };
-            const toggleChatHistory = () => {
-                playClickSound();
-                state.showChatHistory = !state.showChatHistory;
-                render();
-            };
-            const handleNewChat = () => {
-                playClickSound();
-                if (state.tanyaCloud.messages.length > 0) {
-                    saveChatToHistory(state.tanyaCloud.messages);
-                }
-                state.tanyaCloud.messages = [];
-                state.tanyaCloud.prompt = '';
-                state.tanyaCloud.isLoading = false;
-                state.tanyaCloud.error = null;
-                render();
-            };
-            const handleSendMessage = async () => {
-                const prompt = state.tanyaCloud.prompt.trim();
-                if (!prompt || state.tanyaCloud.isLoading) return;
-
-                playClickSound();
-                
-                state.tanyaCloud.messages.push({ role: 'user', text: prompt });
-                state.tanyaCloud.prompt = '';
-                state.tanyaCloud.isLoading = true;
-                state.tanyaCloud.error = null;
-                render();
-
-                if (!navigator.onLine) {
-                    state.tanyaCloud.messages.push({ 
-                        role: 'bot', 
-                        text: 'Maaf, tidak ada koneksi internet. Silakan periksa koneksi Anda dan coba lagi.' 
-                    });
-                    state.tanyaCloud.isLoading = false;
-                    render();
-                    return;
-                }
-                
-                // --- PERUBAHAN DI SINI ---
-                // URL sekarang menunjuk ke proxy serverless kita di Vercel, bukan ke Google langsung
-                // Menggunakan URL lengkap agar berfungsi di lingkungan preview dan saat di-deploy
-                const apiUrl = `https://muslimah-zeta.vercel.app/api/proxy`;
-                // --- AKHIR PERUBAHAN ---
-
-                const systemPrompt = "Anda adalah 'Cloud Sunnah', asisten AI Islami yang ramah, bijak, dan berpengetahuan luas. Jawablah semua pertanyaan dari sudut pandang ajaran Islam berdasarkan Al-Qur'an dan Sunnah. Selalu berikan jawaban yang menenangkan, informatif, dan mudah dipahami oleh audiens Muslimah di Indonesia. Gunakan bahasa Indonesia yang baik dan santun.";
-                
-                // Map the entire conversation history to the format required by the Gemini API.
-                // The roles 'user' and 'bot' from the app's state are mapped to 'user' and 'model'.
-                const contentsForAPI = state.tanyaCloud.messages.map(msg => ({
-                    role: msg.role === 'bot' ? 'model' : 'user',
-                    parts: [{ text: msg.text }]
-                }));
-
-                const payload = {
-                    contents: contentsForAPI,
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                };
-                
-                try {
-                    // Kirim request ke proxy kita
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
-                    const botMessage = candidate?.content?.parts?.[0]?.text || "Maaf, terjadi sedikit kendala. Coba beberapa saat lagi ya.";
-
-                    state.tanyaCloud.messages.push({ role: 'bot', text: botMessage });
-
-                } catch (err) {
-                    console.error("Proxy or API Error:", err);
-                    state.tanyaCloud.messages.push({ role: 'bot', text: generateLocalResponse(prompt) });
-                } finally {
-                    state.tanyaCloud.isLoading = false;
-                    render();
-                }
-            };
-            const generateLocalResponse = (prompt) => {
-                const lowerPrompt = prompt.toLowerCase();
-                if (lowerPrompt.includes('assalamualaikum') || lowerPrompt.includes('salam')) {
-                    return 'Waalaikumsalam warahmatullahi wabarakatuh. Ada yang bisa saya bantu?';
-                }
-                if (lowerPrompt.includes('haid') || lowerPrompt.includes('menstruasi')) {
-                    return 'Haid adalah siklus alami bagi wanita. Selama masa ini, ada beberapa ibadah yang tidak dilakukan seperti sholat dan puasa, namun bisa digantikan dengan dzikir atau mendengarkan kajian. Setelah suci, jangan lupa untuk mengqada puasa yang tertinggal ya.';
-                }
-                return `Mohon maaf, sepertinya terjadi sedikit gangguan saat terhubung dengan server AI kami. \n\nSebagai AI sederhana, saya menyarankan untuk berkonsultasi dengan ustadz atau ulama terpercaya untuk mendapatkan jawaban yang lebih komprehensif. Sementara itu, selalu ingat untuk senantiasa bertakwa kepada Allah SWT dan mengikuti sunnah Rasulullah SAW. \n\nSilakan coba lagi beberapa saat. Barakallahu fiik! 🤲`;
-            };
-
-            // --- Attaching Event Listeners ---
-            const addGlobalEventListeners = () => {
-                // Event delegation for clicks within the main app container
-                appContainer.addEventListener('click', (e) => {
-                    const target = e.target;
-
-                    // Bottom Nav
-                    const navButton = target.closest('.nav-button');
-                    if (navButton?.dataset.screen) return setActiveScreen(navButton.dataset.screen);
-
-                    // Calendar Screen
-                    if (target.closest('#prev-month-btn')) return changeMonth(-1);
-                    if (target.closest('#next-month-btn')) return changeMonth(1);
-                    if (target.closest('#decrease-debt-btn')) return handleDebtChange(-1);
-                    if (target.closest('#increase-debt-btn')) return handleDebtChange(1);
-                    const dayElement = target.closest('.calendar-day');
-                    if (dayElement?.dataset.date) return handleDayClick(dayElement.dataset.date);
-                    
-                    // Settings Screen
-                    if (target.closest('#theme-toggle-btn')) return toggleTheme();
-
-                    // Tanya Cloud
-                    if (target.closest('#new-chat-btn')) return handleNewChat();
-                    if (target.closest('#chat-history-btn')) return toggleChatHistory();
-                    if (target.closest('#send-button')) return handleSendMessage();
-
-                    // Chat History
-                    if (target.closest('#back-from-history-btn')) return toggleChatHistory();
-                    if (target.closest('#clear-history-btn')) return clearAllChatHistory();
-                    const deleteBtn = target.closest('.delete-chat-btn');
-                    if (deleteBtn) return deleteChatFromHistory(Number(deleteBtn.dataset.chatId));
-                    const historyItem = target.closest('.chat-history-item');
-                    if (historyItem) return loadChatFromHistory(Number(historyItem.dataset.chatId));
-                });
-
-                // Listeners for modals which are appended directly to the body
-                document.body.addEventListener('click', e => {
-                    if (e.target.closest('#toggle-menstruation-btn')) return handleToggleMenstruation();
-                    if (e.target.closest('#cancel-modal-btn')) return closeModal();
-                });
-
-                // Listeners for non-click events that don't bubble well for delegation
-                appContainer.addEventListener('input', e => {
-                    if (e.target.id === 'chat-input') {
-                        state.tanyaCloud.prompt = e.target.value;
-                        const sendButton = document.getElementById('send-button');
-                        if (sendButton) sendButton.disabled = state.tanyaCloud.isLoading || !state.tanyaCloud.prompt.trim();
-                    }
-                });
-
-                appContainer.addEventListener('keypress', e => {
-                    if (e.target.id === 'chat-input' && e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSendMessage();
-                    }
-                });
             };
             
-            // --- Main Render Function ---
             const render = () => {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return;
                 let contentHtml = '';
-                mainContent.className = "flex-grow overflow-y-auto relative";
-
                 switch (state.activeScreen) {
                     case 'calendar':
                         contentHtml = renderHeader() + renderCalendarScreen();
                         break;
                     case 'tanya-cloud':
-                        mainContent.className = "flex-grow overflow-hidden relative";
-                        contentHtml = renderTanyaCloudScreen();
+                        contentHtml = renderHeader() + renderTanyaCloudScreen();
                         break;
                     case 'settings':
                         contentHtml = renderHeader() + renderSettingsScreen();
@@ -768,26 +593,11 @@
                 mainContent.innerHTML = contentHtml;
                 renderBottomNav();
                 renderModal();
-
-                if (state.activeScreen === 'tanya-cloud' && !state.showChatHistory) {
-                    const chatContainer = document.getElementById('chat-container');
-                    if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
             };
-
+            
             // --- App Initialization ---
             const init = () => {
-                loadData();
-                applyTheme();
-                addGlobalEventListeners(); // Listeners are now added only once
-                render();
-
-                setTimeout(() => {
-                    splashScreen.style.opacity = '0';
-                    appContainer.classList.remove('hidden');
-                    appContainer.classList.add('flex');
-                    setTimeout(() => splashScreen.style.display = 'none', 500);
-                }, 1500);
+                initAuth();
             };
 
             init();

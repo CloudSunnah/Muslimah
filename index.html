@@ -12,6 +12,10 @@
             darkMode: 'class'
         }
     </script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -62,8 +66,104 @@
 </head>
 <body class="overflow-hidden">
 
+    <!-- Login Screen -->
+    <div id="login-screen" class="w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[101] bg-gradient-to-br from-pink-500 via-rose-400 to-pink-600">
+        <div class="w-full max-w-md px-6">
+            <!-- Logo/Title -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-white tracking-widest mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">MUSLIMAH</h1>
+                <p class="text-white/80 text-lg">by CLOUD SUNNAH</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+                <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">Masuk ke Akun</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <input id="login-email" type="email" placeholder="Email" 
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <div>
+                        <input id="login-password" type="password" placeholder="Password"
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <button id="login-btn" class="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors">
+                        Masuk
+                    </button>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-slate-600">Belum punya akun? 
+                        <button id="show-register-btn" class="text-pink-500 font-semibold hover:text-pink-600">Daftar di sini</button>
+                    </p>
+                </div>
+
+                <div id="login-error" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl hidden">
+                <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">Daftar Akun Baru</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <input id="register-name" type="text" placeholder="Nama Lengkap" 
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <div>
+                        <input id="register-email" type="email" placeholder="Email" 
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <div>
+                        <input id="register-password" type="password" placeholder="Password (min. 6 karakter)"
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <div>
+                        <input id="register-confirm-password" type="password" placeholder="Konfirmasi Password"
+                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                    </div>
+                    <button id="register-btn" class="w-full py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">
+                        Daftar
+                    </button>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-slate-600">Sudah punya akun? 
+                        <button id="show-login-btn" class="text-pink-500 font-semibold hover:text-pink-600">Masuk di sini</button>
+                    </p>
+                </div>
+
+                <div id="register-error" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+                <div id="register-success" class="hidden mt-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm"></div>
+            </div>
+
+            <!-- Waiting for Approval -->
+            <div id="waiting-approval" class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl hidden">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Menunggu Persetujuan</h2>
+                    <p class="text-slate-600 mb-4">Akun Anda sedang menunggu persetujuan dari admin. Anda akan dapat mengakses aplikasi setelah akun disetujui.</p>
+                    <button id="logout-btn" class="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="auth-loading" class="hidden text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                <p class="mt-2 text-white">Memproses...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Splash Screen -->
-    <div id="splash-screen" class="splash-screen w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[100] transition-opacity duration-500">
+    <div id="splash-screen" class="splash-screen w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[100] transition-opacity duration-500 hidden">
         <div class="text-center">
             <h1 class="text-5xl font-bold text-white tracking-widest" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">MUSLIMAH</h1>
             <p class="text-white/80 mt-2 text-lg">by CLOUD SUNNAH</p>
@@ -82,6 +182,302 @@
     </div>
 
     <script>
+        // === Firebase Configuration ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyYsy5vPRlC8h6eu-o7J6hnSpFbYg-JnU",
+            authDomain: "muslimah-ecc7f.firebaseapp.com",
+            projectId: "muslimah-ecc7f",
+            storageBucket: "muslimah-ecc7f.firebasestorage.app",
+            messagingSenderId: "429716762955",
+            appId: "1:429716762955:web:e2cbc6728c4dab2c9a38ce",
+            measurementId: "G-WDR3VGJKW0"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // === Authentication Functions ===
+        const showElement = (id) => document.getElementById(id).classList.remove('hidden');
+        const hideElement = (id) => document.getElementById(id).classList.add('hidden');
+        const showError = (elementId, message) => {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        };
+        const hideError = (elementId) => {
+            document.getElementById(elementId).classList.add('hidden');
+        };
+
+        const registerUser = async () => {
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+
+            hideError('register-error');
+            hideElement('register-success');
+
+            if (!name || !email || !password) {
+                showError('register-error', 'Semua field harus diisi.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('register-error', 'Password minimal 6 karakter.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('register-error', 'Password dan konfirmasi password tidak sama.');
+                return;
+            }
+
+            showElement('auth-loading');
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Update profile dengan nama
+                await user.updateProfile({
+                    displayName: name
+                });
+
+                // Simpan data user ke Firestore dengan status pending
+                await db.collection('users').doc(user.uid).set({
+                    name: name,
+                    email: email,
+                    status: 'pending', // pending, approved, rejected
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    uid: user.uid
+                });
+
+                document.getElementById('register-success').innerHTML = 
+                    'Pendaftaran berhasil! Akun Anda akan disetujui oleh admin terlebih dahulu.';
+                showElement('register-success');
+
+                // Clear form
+                document.getElementById('register-name').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('register-confirm-password').value = '';
+
+                setTimeout(() => {
+                    hideElement('register-form');
+                    showElement('waiting-approval');
+                }, 2000);
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'Terjadi kesalahan saat mendaftar.';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau login.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password terlalu lemah.';
+                }
+                
+                showError('register-error', errorMessage);
+            } finally {
+                hideElement('auth-loading');
+            }
+        };
+
+        const loginUser = async () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            hideError('login-error');
+
+            if (!email || !password) {
+                showError('login-error', 'Email dan password harus diisi.');
+                return;
+            }
+
+            showElement('auth-loading');
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Check user status di Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // Jika user tidak ada di Firestore, buat data baru dengan status pending
+                    await db.collection('users').doc(user.uid).set({
+                        name: user.displayName || 'User',
+                        email: user.email,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        uid: user.uid
+                    });
+                    
+                    hideElement('login-form');
+                    showElement('waiting-approval');
+                    return;
+                }
+
+                const userData = userDoc.data();
+                
+                if (userData.status === 'pending') {
+                    hideElement('login-form');
+                    showElement('waiting-approval');
+                } else if (userData.status === 'approved') {
+                    // User disetujui, lanjut ke aplikasi
+                    proceedToApp();
+                } else if (userData.status === 'rejected') {
+                    await auth.signOut();
+                    showError('login-error', 'Akun Anda ditolak oleh admin. Silakan hubungi administrator.');
+                } else {
+                    // Status tidak dikenal, default ke pending
+                    hideElement('login-form');
+                    showElement('waiting-approval');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Terjadi kesalahan saat login.';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Email tidak terdaftar. Silakan daftar terlebih dahulu.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Password salah.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Terlalu banyak percobaan login. Coba lagi nanti.';
+                }
+                
+                showError('login-error', errorMessage);
+            } finally {
+                hideElement('auth-loading');
+            }
+        };
+
+        const logoutUser = async () => {
+            try {
+                await auth.signOut();
+                hideElement('waiting-approval');
+                showElement('login-form');
+                
+                // Clear forms
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
+
+        const proceedToApp = () => {
+            hideElement('login-screen');
+            showElement('splash-screen');
+            
+            // Initialize app
+            if (typeof window.initApp === 'function') {
+                window.initApp();
+            }
+            
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splash-screen');
+                const appContainer = document.getElementById('app-container');
+                
+                splashScreen.style.opacity = '0';
+                appContainer.classList.remove('hidden');
+                appContainer.classList.add('flex');
+                setTimeout(() => splashScreen.style.display = 'none', 500);
+            }, 1500);
+        };
+
+        // === Auth State Listener ===
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // User sudah login, cek status di Firestore
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        
+                        if (userData.status === 'approved') {
+                            // Jika user sudah disetujui dan sedang di halaman login, langsung masuk
+                            if (!document.getElementById('login-screen').classList.contains('hidden')) {
+                                proceedToApp();
+                            }
+                        } else if (userData.status === 'pending') {
+                            // Tampilkan halaman waiting
+                            hideElement('login-form');
+                            hideElement('register-form');
+                            showElement('waiting-approval');
+                        } else if (userData.status === 'rejected') {
+                            // Logout jika ditolak
+                            await auth.signOut();
+                        }
+                    } else {
+                        // User tidak ada di Firestore, buat dengan status pending
+                        await db.collection('users').doc(user.uid).set({
+                            name: user.displayName || 'User',
+                            email: user.email,
+                            status: 'pending',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            uid: user.uid
+                        });
+                        
+                        hideElement('login-form');
+                        hideElement('register-form');
+                        showElement('waiting-approval');
+                    }
+                } catch (error) {
+                    console.error('Error checking user status:', error);
+                }
+            } else {
+                // User tidak login, tampilkan form login
+                hideElement('splash-screen');
+                hideElement('app-container');
+                showElement('login-screen');
+                showElement('login-form');
+                hideElement('register-form');
+                hideElement('waiting-approval');
+            }
+        });
+
+        // === Auth Event Listeners ===
+        document.addEventListener('DOMContentLoaded', () => {
+            // Login/Register form toggles
+            document.getElementById('show-register-btn').addEventListener('click', () => {
+                hideElement('login-form');
+                showElement('register-form');
+                hideError('login-error');
+            });
+
+            document.getElementById('show-login-btn').addEventListener('click', () => {
+                hideElement('register-form');
+                showElement('login-form');
+                hideError('register-error');
+                hideElement('register-success');
+            });
+
+            // Form submissions
+            document.getElementById('login-btn').addEventListener('click', loginUser);
+            document.getElementById('register-btn').addEventListener('click', registerUser);
+            document.getElementById('logout-btn').addEventListener('click', logoutUser);
+
+            // Enter key support
+            document.getElementById('login-email').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginUser();
+            });
+            document.getElementById('login-password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginUser();
+            });
+            document.getElementById('register-confirm-password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerUser();
+            });
+        });
+
         // === App State and Logic ===
         document.addEventListener('DOMContentLoaded', () => {
             const mainContent = document.getElementById('main-content');
@@ -139,8 +535,7 @@
                 clipz: {
                     videos: [
                         'https://files.catbox.moe/yn4dut.mp4',
-                        'https://files.catbox.moe/qwwqwj.mp4',
-                        'https://files.catbox.moe/8tczgh.mp4'
+                        'https://files.catbox.moe/qwwqwj.mp4'
                     ],
                     currentVideoIndex: 0,
                     isPlaying: false
@@ -148,10 +543,26 @@
             };
 
             // === Audio System ===
+            let audioContext = null;
+            let isPlayingClickSound = false;
+
             const playClickSound = () => {
+                // Prevent multiple simultaneous click sounds
+                if (isPlayingClickSound) return;
+                
                 try {
-                    // Membuat audio context untuk suara klik
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    // Initialize audio context only once
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+
+                    // Resume audio context if suspended
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+
+                    isPlayingClickSound = true;
+                    
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
 
@@ -161,13 +572,19 @@
                     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
                     oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
 
-                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
 
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.1);
+
+                    // Reset flag after sound duration
+                    setTimeout(() => {
+                        isPlayingClickSound = false;
+                    }, 150);
                 } catch (e) {
                     // Fallback jika audio context tidak didukung
+                    isPlayingClickSound = false;
                     console.log("Audio not supported");
                 }
             };
@@ -977,16 +1394,26 @@
                         </div>
 
                         <!-- Video Container -->
-                        <div class="flex-1 flex items-center justify-center relative" id="video-wrapper">
+                        <div class="flex-1 flex items-center justify-center relative bg-black" id="video-wrapper">
                             <video 
                                 id="clipz-video" 
                                 src="${currentVideo}" 
-                                class="w-full h-full object-cover"
+                                class="w-full h-full object-cover bg-black"
                                 autoplay 
                                 loop 
                                 playsinline
                                 controls
+                                preload="metadata"
+                                crossorigin="anonymous"
                             ></video>
+
+                            <!-- Loading Indicator -->
+                            <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden">
+                                <div class="text-white text-center">
+                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
+                                    <p class="text-sm">Loading video...</p>
+                                </div>
+                            </div>
 
                             <!-- Swipe Overlay -->
                             <div id="swipe-overlay" class="absolute inset-0 touch-none"></div>
@@ -1926,23 +2353,60 @@
                 if (state.activeScreen === 'clipz') {
                     setTimeout(() => {
                         const video = document.getElementById('clipz-video');
-                        if (video) {
-                            video.muted = false; // Aktifkan suara
-                            video.volume = 0.8; // Set volume 80%
+                        const loadingIndicator = document.getElementById('video-loading');
+                        
+                        if (video && loadingIndicator) {
+                            // Show loading indicator
+                            loadingIndicator.classList.remove('hidden');
                             
-                            // Ensure autoplay works
-                            const playPromise = video.play();
-                            if (playPromise !== undefined) {
-                                playPromise.catch(error => {
-                                    console.log("Autoplay prevented:", error);
-                                    // Jika autoplay gagal, video akan tetap bisa dimainkan secara manual
-                                });
-                            }
+                            // Video event listeners
+                            video.addEventListener('loadstart', () => {
+                                loadingIndicator.classList.remove('hidden');
+                            });
+
+                            video.addEventListener('loadeddata', () => {
+                                loadingIndicator.classList.add('hidden');
+                                console.log('Video data loaded successfully');
+                            });
+
+                            video.addEventListener('canplay', () => {
+                                loadingIndicator.classList.add('hidden');
+                                
+                                // Set video properties
+                                video.muted = false;
+                                video.volume = 0.7;
+                                
+                                // Attempt to play
+                                const playPromise = video.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.then(() => {
+                                        console.log('Video playing successfully');
+                                    }).catch(error => {
+                                        console.log("Autoplay prevented, user interaction required:", error);
+                                        // Show play button overlay if autoplay fails
+                                        video.muted = true;
+                                        video.play().catch(e => console.log("Muted autoplay also failed:", e));
+                                    });
+                                }
+                            });
+
+                            video.addEventListener('error', (e) => {
+                                console.error('Video error:', e);
+                                loadingIndicator.innerHTML = `
+                                    <div class="text-white text-center">
+                                        <p class="text-sm">Error loading video</p>
+                                        <button onclick="location.reload()" class="mt-2 px-4 py-2 bg-white/20 rounded-lg text-sm">Retry</button>
+                                    </div>
+                                `;
+                            });
 
                             // Auto-navigate ke video berikutnya saat video selesai
                             video.addEventListener('ended', () => {
                                 playNextVideo();
                             });
+
+                            // Force load the video
+                            video.load();
                         }
                     }, 100);
                 }
@@ -1959,16 +2423,10 @@
                 if (!state.prayerTimes.data) {
                     setTimeout(() => getPrayerTimes(), 2000);
                 }
-
-                setTimeout(() => {
-                    splashScreen.style.opacity = '0';
-                    appContainer.classList.remove('hidden');
-                    appContainer.classList.add('flex');
-                    setTimeout(() => splashScreen.style.display = 'none', 500);
-                }, 1500);
             };
 
-            init();
+            // Initialize app only after authentication
+            window.initApp = init;
         });
     </script>
 </body>

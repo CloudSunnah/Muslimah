@@ -78,7 +78,7 @@
             <!-- Login Form -->
             <div id="login-form" class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
                 <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">Masuk ke Akun</h2>
-                
+
                 <div class="space-y-4">
                     <div>
                         <input id="login-email" type="email" placeholder="Email" 
@@ -105,7 +105,7 @@
             <!-- Register Form -->
             <div id="register-form" class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl hidden">
                 <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">Daftar Akun Baru</h2>
-                
+
                 <div class="space-y-4">
                     <div>
                         <input id="register-name" type="text" placeholder="Nama Lengkap" 
@@ -272,7 +272,7 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 let errorMessage = 'Terjadi kesalahan saat mendaftar.';
-                
+
                 if (error.code === 'auth/email-already-in-use') {
                     errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau login.';
                 } else if (error.code === 'auth/invalid-email') {
@@ -280,7 +280,7 @@
                 } else if (error.code === 'auth/weak-password') {
                     errorMessage = 'Password terlalu lemah.';
                 }
-                
+
                 showError('register-error', errorMessage);
             } finally {
                 hideElement('auth-loading');
@@ -306,7 +306,7 @@
 
                 // Check user status di Firestore
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                
+
                 if (!userDoc.exists) {
                     // Jika user tidak ada di Firestore, buat data baru dengan status pending
                     await db.collection('users').doc(user.uid).set({
@@ -316,14 +316,14 @@
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         uid: user.uid
                     });
-                    
+
                     hideElement('login-form');
                     showElement('waiting-approval');
                     return;
                 }
 
                 const userData = userDoc.data();
-                
+
                 if (userData.status === 'pending') {
                     hideElement('login-form');
                     showElement('waiting-approval');
@@ -342,7 +342,7 @@
             } catch (error) {
                 console.error('Login error:', error);
                 let errorMessage = 'Terjadi kesalahan saat login.';
-                
+
                 if (error.code === 'auth/user-not-found') {
                     errorMessage = 'Email tidak terdaftar. Silakan daftar terlebih dahulu.';
                 } else if (error.code === 'auth/wrong-password') {
@@ -352,7 +352,7 @@
                 } else if (error.code === 'auth/too-many-requests') {
                     errorMessage = 'Terlalu banyak percobaan login. Coba lagi nanti.';
                 }
-                
+
                 showError('login-error', errorMessage);
             } finally {
                 hideElement('auth-loading');
@@ -364,7 +364,7 @@
                 await auth.signOut();
                 hideElement('waiting-approval');
                 showElement('login-form');
-                
+
                 // Clear forms
                 document.getElementById('login-email').value = '';
                 document.getElementById('login-password').value = '';
@@ -376,16 +376,16 @@
         const proceedToApp = () => {
             hideElement('login-screen');
             showElement('splash-screen');
-            
+
             // Initialize app
             if (typeof window.initApp === 'function') {
                 window.initApp();
             }
-            
+
             setTimeout(() => {
                 const splashScreen = document.getElementById('splash-screen');
                 const appContainer = document.getElementById('app-container');
-                
+
                 splashScreen.style.opacity = '0';
                 appContainer.classList.remove('hidden');
                 appContainer.classList.add('flex');
@@ -399,10 +399,10 @@
                 // User sudah login, cek status di Firestore
                 try {
                     const userDoc = await db.collection('users').doc(user.uid).get();
-                    
+
                     if (userDoc.exists) {
                         const userData = userDoc.data();
-                        
+
                         if (userData.status === 'approved') {
                             // Jika user sudah disetujui dan sedang di halaman login, langsung masuk
                             if (!document.getElementById('login-screen').classList.contains('hidden')) {
@@ -426,7 +426,7 @@
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                             uid: user.uid
                         });
-                        
+
                         hideElement('login-form');
                         hideElement('register-form');
                         showElement('waiting-approval');
@@ -535,7 +535,10 @@
                 clipz: {
                     videos: [
                         'https://files.catbox.moe/yn4dut.mp4',
-                        'https://files.catbox.moe/qwwqwj.mp4'
+                        'https://files.catbox.moe/qwwqwj.mp4',
+                        'https://files.catbox.moe/8tczgh.mp4',
+                        'https://files.catbox.moe/tqz3g4.mp4',
+                        'https://files.catbox.moe/ahvf6o.mp4'
                     ],
                     currentVideoIndex: 0,
                     isPlaying: false
@@ -549,7 +552,7 @@
             const playClickSound = () => {
                 // Prevent multiple simultaneous click sounds
                 if (isPlayingClickSound) return;
-                
+
                 try {
                     // Initialize audio context only once
                     if (!audioContext) {
@@ -562,7 +565,7 @@
                     }
 
                     isPlayingClickSound = true;
-                    
+
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
 
@@ -835,26 +838,314 @@
             };
 
             // === Sistem Clipz ===
-            const shuffleVideos = () => {
+            let currentVideoElement = null;
+            let videoInitialized = false;
+            let isVideoTransitioning = false;
+            let lastSwipeTime = 0;
+
+            const cleanupCurrentVideo = () => {
+                if (currentVideoElement) {
+                    try {
+                        currentVideoElement.pause();
+                        currentVideoElement.currentTime = 0;
+                        currentVideoElement.src = '';
+                        currentVideoElement.load();
+                        currentVideoElement.removeEventListener('loadstart', handleVideoLoadStart);
+                        currentVideoElement.removeEventListener('loadeddata', handleVideoLoadedData);
+                        currentVideoElement.removeEventListener('canplay', handleVideoCanPlay);
+                        currentVideoElement.removeEventListener('error', handleVideoError);
+                        currentVideoElement.removeEventListener('ended', handleVideoEnded);
+                        currentVideoElement.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
+                    } catch (e) {
+                        console.log('Error during video cleanup:', e);
+                    }
+                    currentVideoElement = null;
+                }
+                videoInitialized = false;
+                isVideoTransitioning = false;
+            };
+
+            const handleVideoLoadStart = () => {
+                const loadingIndicator = document.getElementById('video-loading');
+                if (loadingIndicator) {
+                    loadingIndicator.classList.remove('hidden');
+                }
+                console.log('Video load started');
+            };
+
+            const handleVideoLoadedData = () => {
+                console.log('Video data loaded successfully');
+            };
+
+            const handleVideoLoadedMetadata = () => {
+                console.log('Video metadata loaded');
+                if (currentVideoElement) {
+                    // Pastikan video memiliki dimensi yang benar
+                    currentVideoElement.style.width = '100%';
+                    currentVideoElement.style.height = '100%';
+                    currentVideoElement.style.objectFit = 'cover';
+                    currentVideoElement.style.backgroundColor = '#000000';
+                }
+            };
+
+            const handleVideoCanPlay = () => {
+                const loadingIndicator = document.getElementById('video-loading');
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                }
+
+                if (currentVideoElement && !videoInitialized && state.activeScreen === 'clipz') {
+                    videoInitialized = true;
+                    console.log('Video ready to play');
+
+                    // Pastikan video properties
+                    currentVideoElement.style.display = 'block';
+                    currentVideoElement.style.opacity = '1';
+                    currentVideoElement.style.visibility = 'visible';
+                    currentVideoElement.style.backgroundColor = '#000000';
+                    currentVideoElement.style.width = '100%';
+                    currentVideoElement.style.height = '100%';
+                    currentVideoElement.style.objectFit = 'cover';
+                    currentVideoElement.style.zIndex = '1';
+
+                    // Show tap to unmute indicator dari awal
+                    const tapIndicator = document.getElementById('tap-to-unmute');
+                    if (tapIndicator) {
+                        tapIndicator.classList.remove('hidden');
+                    }
+
+                    // Play video muted untuk menghindari autoplay prevention
+                    const attemptPlay = async () => {
+                        if (!currentVideoElement || isVideoTransitioning) return;
+
+                        try {
+                            // Pastikan video sudah ready dan mulai muted
+                            if (currentVideoElement.readyState >= 2) {
+                                currentVideoElement.muted = true;
+                                await currentVideoElement.play();
+                                console.log('Video playing muted');
+
+                                // Setup auto-unmute on interaction
+                                const enableAudio = () => {
+                                    if (currentVideoElement) {
+                                        currentVideoElement.muted = false;
+                                        currentVideoElement.volume = 0.8;
+                                        const tapIndicator = document.getElementById('tap-to-unmute');
+                                        if (tapIndicator) tapIndicator.classList.add('hidden');
+                                    }
+                                };
+
+                                document.addEventListener('click', enableAudio, { once: true });
+                                document.addEventListener('touchstart', enableAudio, { once: true });
+                            } else {
+                                // Tunggu video ready
+                                setTimeout(attemptPlay, 300);
+                            }
+                        } catch (error) {
+                            console.error("Video play failed:", error);
+                            // Try next video if current one fails
+                            if (state.clipz.videos.length > 1) {
+                                setTimeout(() => playNextVideo(), 1000);
+                            }
+                        }
+                    };
+
+                    // Delay untuk memastikan DOM ready
+                    setTimeout(attemptPlay, 300);
+                }
+            };
+
+            const handleVideoError = (e) => {
+                console.error('Video error:', e);
+                isVideoTransitioning = false;
+                const loadingIndicator = document.getElementById('video-loading');
+                if (loadingIndicator) {
+                    loadingIndicator.innerHTML = `
+                        <div class="text-white text-center">
+                            <p class="text-sm mb-2">Gagal memuat video</p>
+                            <button onclick="window.location.reload()" class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30">
+                                Muat Ulang
+                            </button>
+                        </div>
+                    `;
+                }
+            };
+
+            const handleVideoEnded = () => {
+                if (!isVideoTransitioning) {
+                    playNextVideo();
+                }
+            };
+
+            const initializeVideo = () => {
+                if (state.activeScreen !== 'clipz') return;
+
+                const video = document.getElementById('clipz-video');
+                const loadingIndicator = document.getElementById('video-loading');
+
+                if (video) {
+                    // Cleanup previous video jika ada
+                    if (currentVideoElement && currentVideoElement !== video) {
+                        cleanupCurrentVideo();
+                    }
+
+                    currentVideoElement = video;
+                    videoInitialized = false;
+
+                    // Show loading indicator dulu
+                    if (loadingIndicator) {
+                        loadingIndicator.classList.remove('hidden');
+                        loadingIndicator.innerHTML = `
+                            <div class="text-white text-center">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
+                                <p class="text-sm">Memuat video...</p>
+                            </div>
+                        `;
+                    }
+
+                    // Reset semua properties video
+                    try {
+                        video.pause();
+                        video.currentTime = 0;
+                        video.muted = true; // Start muted untuk menghindari autoplay issues
+                        video.volume = 0.8;
+                        video.preload = 'metadata';
+                        video.playsInline = true;
+                        video.loop = true;
+                        video.controls = false;
+                        video.autoplay = false;
+
+                        // Set styling dengan force
+                        video.style.cssText = `
+                            display: block !important;
+                            opacity: 1 !important;
+                            visibility: visible !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            object-fit: cover !important;
+                            background-color: #000000 !important;
+                            position: absolute !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            z-index: 1 !important;
+                        `;
+
+                        // Remove existing event listeners
+                        video.removeEventListener('loadstart', handleVideoLoadStart);
+                        video.removeEventListener('loadeddata', handleVideoLoadedData);
+                        video.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
+                        video.removeEventListener('canplay', handleVideoCanPlay);
+                        video.removeEventListener('error', handleVideoError);
+                        video.removeEventListener('ended', handleVideoEnded);
+
+                        // Add fresh event listeners
+                        video.addEventListener('loadstart', handleVideoLoadStart);
+                        video.addEventListener('loadeddata', handleVideoLoadedData);
+                        video.addEventListener('loadedmetadata', handleVideoLoadedMetadata);
+                        video.addEventListener('canplay', handleVideoCanPlay);
+                        video.addEventListener('error', handleVideoError);
+                        video.addEventListener('ended', handleVideoEnded);
+
+                        // Force reload dengan src baru
+                        const currentSrc = state.clipz.videos[state.clipz.currentVideoIndex];
+                        
+                        // Test video URL terlebih dahulu
+                        const testVideo = document.createElement('video');
+                        testVideo.addEventListener('error', () => {
+                            console.error('Video URL error:', currentSrc);
+                            // Skip to next video if current one is broken
+                            if (state.clipz.videos.length > 1) {
+                                playNextVideo();
+                            }
+                        });
+                        testVideo.src = currentSrc;
+                        
+                        video.src = '';
+                        video.src = currentSrc;
+                        video.load();
+
+                        console.log('Initializing video:', currentSrc);
+
+                    } catch (error) {
+                        console.error('Error initializing video:', error);
+                        isVideoTransitioning = false;
+                        // Try next video if there's an error
+                        if (state.clipz.videos.length > 1) {
+                            setTimeout(() => playNextVideo(), 1000);
+                        }
+                    }
+                }
+            };
+
+            // Shuffle videos automatically when entering Clipz
+            const autoShuffleVideos = () => {
+                // Shuffle array videos dengan algoritma Fisher-Yates
                 const videos = [...state.clipz.videos];
                 for (let i = videos.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [videos[i], videos[j]] = [videos[j], videos[i]];
                 }
+                
+                // Update state dengan urutan baru
                 state.clipz.videos = videos;
                 state.clipz.currentVideoIndex = 0;
-                render();
+                
+                console.log('Videos automatically shuffled, first video:', state.clipz.videos[0]);
             };
 
             const playNextVideo = () => {
+                // Prevent rapid swipes dengan waktu lebih lama
+                const now = Date.now();
+                if (isVideoTransitioning || (now - lastSwipeTime) < 1500) return;
+
+                lastSwipeTime = now;
+                isVideoTransitioning = true;
+
+                console.log('Playing next video...');
+
+                // Cleanup video saat ini dengan aman
+                cleanupCurrentVideo();
+
+                // Pindah ke video berikutnya
                 state.clipz.currentVideoIndex = (state.clipz.currentVideoIndex + 1) % state.clipz.videos.length;
+
+                console.log('Next video index:', state.clipz.currentVideoIndex);
+
+                // Render ulang
                 render();
+
+                // Tunggu DOM ready dan inisialisasi video baru
+                setTimeout(() => {
+                    initializeVideo();
+                }, 800);
             };
 
             const playPrevVideo = () => {
+                // Prevent rapid swipes dengan waktu lebih lama
+                const now = Date.now();
+                if (isVideoTransitioning || (now - lastSwipeTime) < 1500) return;
+
+                lastSwipeTime = now;
+                isVideoTransitioning = true;
+
+                console.log('Playing previous video...');
+
+                // Cleanup video saat ini dengan aman
+                cleanupCurrentVideo();
+
+                // Pindah ke video sebelumnya
                 state.clipz.currentVideoIndex = state.clipz.currentVideoIndex === 0 ? 
                     state.clipz.videos.length - 1 : state.clipz.currentVideoIndex - 1;
+
+                console.log('Previous video index:', state.clipz.currentVideoIndex);
+
+                // Render ulang
                 render();
+
+                // Tunggu DOM ready dan inisialisasi video baru
+                setTimeout(() => {
+                    initializeVideo();
+                }, 800);
             };
 
             // === Sistem Jadwal Sholat ===
@@ -1385,45 +1676,54 @@
                     <div class="h-full flex flex-col bg-black relative" id="clipz-container">
                         <!-- Header -->
                         <div class="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-center items-center">
                                 <h1 class="text-white text-xl font-bold">Clipz</h1>
-                                <button id="refresh-videos-btn" class="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-all">
-                                    ${icons.RefreshCw("w-5 h-5")}
-                                </button>
                             </div>
                         </div>
 
                         <!-- Video Container -->
-                        <div class="flex-1 flex items-center justify-center relative bg-black" id="video-wrapper">
+                        <div class="flex-1 relative bg-black overflow-hidden" id="video-wrapper">
                             <video 
                                 id="clipz-video" 
                                 src="${currentVideo}" 
-                                class="w-full h-full object-cover bg-black"
-                                autoplay 
+                                class="absolute inset-0 w-full h-full object-cover"
                                 loop 
+                                autoplay
                                 playsinline
-                                controls
                                 preload="metadata"
-                                crossorigin="anonymous"
+                                controls="false"
+                                style="background-color: #000000; z-index: 1;"
                             ></video>
 
                             <!-- Loading Indicator -->
-                            <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-black/50 hidden">
+                            <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-black z-20">
                                 <div class="text-white text-center">
                                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                                    <p class="text-sm">Loading video...</p>
+                                    <p class="text-sm">Memuat video...</p>
                                 </div>
                             </div>
 
+                            <!-- Tap to Unmute Overlay -->
+                            <div id="tap-to-unmute" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm z-30 hidden">
+                                Ketuk untuk mendengar suara
+                            </div>
+
                             <!-- Swipe Overlay -->
-                            <div id="swipe-overlay" class="absolute inset-0 touch-none"></div>
+                            <div id="swipe-overlay" class="absolute inset-0 z-10"></div>
                         </div>
 
                         <!-- Video Indicators -->
-                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 flex flex-col gap-2">
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 flex flex-col gap-2">
                             ${state.clipz.videos.map((_, index) => `
                                 <div class="w-1 h-8 rounded-full ${index === state.clipz.currentVideoIndex ? 'bg-white' : 'bg-white/30'}"></div>
                             `).join('')}
+                        </div>
+
+                        <!-- Video Controls -->
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 hidden">
+                            <div class="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
+                                Video ${state.clipz.currentVideoIndex + 1} dari ${state.clipz.videos.length}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2004,6 +2304,12 @@
                 playClickSound();
                 state.activeScreen = screen;
                 state.showChatHistory = false;
+                
+                // Auto shuffle videos saat masuk ke Clipz screen
+                if (screen === 'clipz') {
+                    autoShuffleVideos();
+                }
+                
                 render();
             };
             const changeMonth = (offset) => {
@@ -2189,12 +2495,7 @@
                     const dayElement = target.closest('.calendar-day');
                     if (dayElement?.dataset.date) return handleDayClick(dayElement.dataset.date);
 
-                    // Clipz Screen
-                    if (target.closest('#refresh-videos-btn')) {
-                        playClickSound();
-                        shuffleVideos();
-                        return;
-                    }
+                    
 
                     // Kuiz Screen
                     if (target.closest('#start-quiz-btn')) return getRandomQuestion();
@@ -2246,11 +2547,12 @@
                 // Touch/Swipe event listeners untuk Clipz
                 let startY = 0;
                 let startTime = 0;
-                const minSwipeDistance = 50;
-                const maxSwipeTime = 300;
+                const minSwipeDistance = 100;
+                const maxSwipeTime = 600;
+                let lastTouchTime = 0;
 
                 appContainer.addEventListener('touchstart', e => {
-                    if (state.activeScreen === 'clipz') {
+                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
                         const touch = e.touches[0];
                         startY = touch.clientY;
                         startTime = Date.now();
@@ -2258,38 +2560,85 @@
                 }, { passive: true });
 
                 appContainer.addEventListener('touchend', e => {
-                    if (state.activeScreen === 'clipz') {
+                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
                         const touch = e.changedTouches[0];
                         const endY = touch.clientY;
                         const endTime = Date.now();
                         const deltaY = startY - endY;
                         const deltaTime = endTime - startTime;
 
+                        // Prevent rapid successive swipes dengan waktu lebih lama
+                        if (endTime - lastTouchTime < 2000) return;
+
                         if (Math.abs(deltaY) > minSwipeDistance && deltaTime < maxSwipeTime) {
+                            e.preventDefault();
+                            lastTouchTime = endTime;
+
                             if (deltaY > 0) {
                                 // Swipe up - next video
-                                playClickSound();
                                 playNextVideo();
                             } else {
                                 // Swipe down - previous video
-                                playClickSound();
                                 playPrevVideo();
+                            }
+                        } else if (deltaTime < 300 && Math.abs(deltaY) < 20) {
+                            // Tap to unmute/control video
+                            if (currentVideoElement && !isVideoTransitioning) {
+                                if (currentVideoElement.muted) {
+                                    currentVideoElement.muted = false;
+                                    currentVideoElement.volume = 0.8;
+                                    const tapIndicator = document.getElementById('tap-to-unmute');
+                                    if (tapIndicator) tapIndicator.classList.add('hidden');
+                                } else {
+                                    // Toggle play/pause
+                                    if (currentVideoElement.paused) {
+                                        currentVideoElement.play();
+                                    } else {
+                                        currentVideoElement.pause();
+                                    }
+                                }
                             }
                         }
                     }
-                }, { passive: true });
+                }, { passive: false });
+
+                // Click event untuk desktop
+                appContainer.addEventListener('click', e => {
+                    if (state.activeScreen === 'clipz' && e.target.closest('#swipe-overlay')) {
+                        if (currentVideoElement && !isVideoTransitioning) {
+                            if (currentVideoElement.muted) {
+                                currentVideoElement.muted = false;
+                                currentVideoElement.volume = 0.8;
+                                const tapIndicator = document.getElementById('tap-to-unmute');
+                                if (tapIndicator) tapIndicator.classList.add('hidden');
+                            } else {
+                                // Toggle play/pause
+                                if (currentVideoElement.paused) {
+                                    currentVideoElement.play();
+                                } else {
+                                    currentVideoElement.pause();
+                                }
+                            }
+                        }
+                    }
+                });
 
                 // Mouse wheel event untuk desktop
+                let lastWheelTime = 0;
                 appContainer.addEventListener('wheel', e => {
-                    if (state.activeScreen === 'clipz') {
+                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
                         e.preventDefault();
+                        const now = Date.now();
+
+                        // Prevent rapid wheel events dengan waktu lebih lama
+                        if (now - lastWheelTime < 1500) return;
+                        lastWheelTime = now;
+
                         if (e.deltaY > 0) {
                             // Scroll down - next video
-                            playClickSound();
                             playNextVideo();
                         } else {
                             // Scroll up - previous video
-                            playClickSound();
                             playPrevVideo();
                         }
                     }
@@ -2349,66 +2698,21 @@
                     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
 
-                // Setup video autoplay dengan suara untuk Clipz
+                // Setup video player untuk Clipz
                 if (state.activeScreen === 'clipz') {
                     setTimeout(() => {
-                        const video = document.getElementById('clipz-video');
-                        const loadingIndicator = document.getElementById('video-loading');
-                        
-                        if (video && loadingIndicator) {
-                            // Show loading indicator
-                            loadingIndicator.classList.remove('hidden');
-                            
-                            // Video event listeners
-                            video.addEventListener('loadstart', () => {
-                                loadingIndicator.classList.remove('hidden');
-                            });
-
-                            video.addEventListener('loadeddata', () => {
-                                loadingIndicator.classList.add('hidden');
-                                console.log('Video data loaded successfully');
-                            });
-
-                            video.addEventListener('canplay', () => {
-                                loadingIndicator.classList.add('hidden');
-                                
-                                // Set video properties
-                                video.muted = false;
-                                video.volume = 0.7;
-                                
-                                // Attempt to play
-                                const playPromise = video.play();
-                                if (playPromise !== undefined) {
-                                    playPromise.then(() => {
-                                        console.log('Video playing successfully');
-                                    }).catch(error => {
-                                        console.log("Autoplay prevented, user interaction required:", error);
-                                        // Show play button overlay if autoplay fails
-                                        video.muted = true;
-                                        video.play().catch(e => console.log("Muted autoplay also failed:", e));
-                                    });
-                                }
-                            });
-
-                            video.addEventListener('error', (e) => {
-                                console.error('Video error:', e);
-                                loadingIndicator.innerHTML = `
-                                    <div class="text-white text-center">
-                                        <p class="text-sm">Error loading video</p>
-                                        <button onclick="location.reload()" class="mt-2 px-4 py-2 bg-white/20 rounded-lg text-sm">Retry</button>
-                                    </div>
-                                `;
-                            });
-
-                            // Auto-navigate ke video berikutnya saat video selesai
-                            video.addEventListener('ended', () => {
-                                playNextVideo();
-                            });
-
-                            // Force load the video
-                            video.load();
-                        }
+                        initializeVideo();
+                        // Show tap to unmute indicator if video is muted
+                        setTimeout(() => {
+                            if (currentVideoElement && currentVideoElement.muted) {
+                                const tapIndicator = document.getElementById('tap-to-unmute');
+                                if (tapIndicator) tapIndicator.classList.remove('hidden');
+                            }
+                        }, 1000);
                     }, 100);
+                } else {
+                    // Cleanup video ketika tidak di screen clipz
+                    cleanupCurrentVideo();
                 }
             };
 

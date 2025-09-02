@@ -964,7 +964,7 @@
                 const currentVideo = state.clipz.videos[state.clipz.currentVideoIndex];
 
                 return `
-                    <div class="h-full flex flex-col bg-black relative">
+                    <div class="h-full flex flex-col bg-black relative" id="clipz-container">
                         <!-- Header -->
                         <div class="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
                             <div class="flex justify-between items-center">
@@ -976,42 +976,19 @@
                         </div>
 
                         <!-- Video Container -->
-                        <div class="flex-1 flex items-center justify-center relative">
+                        <div class="flex-1 flex items-center justify-center relative" id="video-wrapper">
                             <video 
                                 id="clipz-video" 
                                 src="${currentVideo}" 
                                 class="w-full h-full object-cover"
                                 autoplay 
                                 loop 
-                                muted
                                 playsinline
                                 controls
                             ></video>
 
-                            <!-- Navigation Overlay -->
-                            <div class="absolute inset-0 flex">
-                                <!-- Left tap area -->
-                                <div id="prev-video-area" class="flex-1 flex items-center justify-start pl-4 cursor-pointer">
-                                    <div class="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity">
-                                        ${icons.ChevronLeft("w-6 h-6")}
-                                    </div>
-                                </div>
-
-                                <!-- Right tap area -->
-                                <div id="next-video-area" class="flex-1 flex items-center justify-end pr-4 cursor-pointer">
-                                    <div class="w-12 h-12 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity">
-                                        ${icons.ChevronRight("w-6 h-6")}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bottom Info -->
-                        <div class="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/50 to-transparent">
-                            <div class="text-white">
-                                <p class="text-sm opacity-75">Video ${state.clipz.currentVideoIndex + 1} dari ${state.clipz.videos.length}</p>
-                                <p class="text-xs opacity-50">Tap kiri/kanan untuk navigasi</p>
-                            </div>
+                            <!-- Swipe Overlay -->
+                            <div id="swipe-overlay" class="absolute inset-0 touch-none"></div>
                         </div>
 
                         <!-- Video Indicators -->
@@ -1790,16 +1767,6 @@
                         shuffleVideos();
                         return;
                     }
-                    if (target.closest('#prev-video-area')) {
-                        playClickSound();
-                        playPrevVideo();
-                        return;
-                    }
-                    if (target.closest('#next-video-area')) {
-                        playClickSound();
-                        playNextVideo();
-                        return;
-                    }
 
                     // Kuiz Screen
                     if (target.closest('#start-quiz-btn')) return getRandomQuestion();
@@ -1847,6 +1814,58 @@
                         if (sendButton) sendButton.disabled = state.tanyaCloud.isLoading || !state.tanyaCloud.prompt.trim();
                     }
                 });
+
+                // Touch/Swipe event listeners untuk Clipz
+                let startY = 0;
+                let startTime = 0;
+                const minSwipeDistance = 50;
+                const maxSwipeTime = 300;
+
+                appContainer.addEventListener('touchstart', e => {
+                    if (state.activeScreen === 'clipz') {
+                        const touch = e.touches[0];
+                        startY = touch.clientY;
+                        startTime = Date.now();
+                    }
+                }, { passive: true });
+
+                appContainer.addEventListener('touchend', e => {
+                    if (state.activeScreen === 'clipz') {
+                        const touch = e.changedTouches[0];
+                        const endY = touch.clientY;
+                        const endTime = Date.now();
+                        const deltaY = startY - endY;
+                        const deltaTime = endTime - startTime;
+
+                        if (Math.abs(deltaY) > minSwipeDistance && deltaTime < maxSwipeTime) {
+                            if (deltaY > 0) {
+                                // Swipe up - next video
+                                playClickSound();
+                                playNextVideo();
+                            } else {
+                                // Swipe down - previous video
+                                playClickSound();
+                                playPrevVideo();
+                            }
+                        }
+                    }
+                }, { passive: true });
+
+                // Mouse wheel event untuk desktop
+                appContainer.addEventListener('wheel', e => {
+                    if (state.activeScreen === 'clipz') {
+                        e.preventDefault();
+                        if (e.deltaY > 0) {
+                            // Scroll down - next video
+                            playClickSound();
+                            playNextVideo();
+                        } else {
+                            // Scroll up - previous video
+                            playClickSound();
+                            playPrevVideo();
+                        }
+                    }
+                }, { passive: false });
 
                 // Event listener untuk radio button kuiz
                 appContainer.addEventListener('change', e => {
@@ -1900,6 +1919,31 @@
                 if (state.activeScreen === 'tanya-cloud' && !state.showChatHistory) {
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+
+                // Setup video autoplay dengan suara untuk Clipz
+                if (state.activeScreen === 'clipz') {
+                    setTimeout(() => {
+                        const video = document.getElementById('clipz-video');
+                        if (video) {
+                            video.muted = false; // Aktifkan suara
+                            video.volume = 0.8; // Set volume 80%
+                            
+                            // Ensure autoplay works
+                            const playPromise = video.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(error => {
+                                    console.log("Autoplay prevented:", error);
+                                    // Jika autoplay gagal, video akan tetap bisa dimainkan secara manual
+                                });
+                            }
+
+                            // Auto-navigate ke video berikutnya saat video selesai
+                            video.addEventListener('ended', () => {
+                                playNextVideo();
+                            });
+                        }
+                    }, 100);
                 }
             };
 

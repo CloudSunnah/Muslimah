@@ -2168,9 +2168,6 @@
                     const modalHtml = `
                     <div id="menstruation-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
                         <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
-                            <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                               ${date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                            </h2>
                             <p class="text-slate-500 dark:text-slate-400 mb-6">Pilih jenis penanda:</p>
                             <div class="flex flex-col gap-3">
                                 <button id="mark-start-period-btn" class="w-full ${isMarkedStart ? 'bg-red-500' : 'bg-red-400'} text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 transition-colors">

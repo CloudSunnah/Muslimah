@@ -491,7 +491,7 @@
             // --- App State ---
             let state = {
                 theme: 'light',
-                activeScreen: 'clipz',
+                activeScreen: 'tap-clipz',
                 currentDate: new Date(),
                 isModalOpen: false,
                 selectedDate: null,
@@ -503,6 +503,17 @@
                     isLoading: false,
                     error: null,
                     chatHistory: [],
+                },
+                tapClipz: {
+                    currentVideoIndex: 0,
+                    videos: [
+                        'https://files.catbox.moe/yn4dut.mp4',
+                        'https://files.catbox.moe/qwwqwj.mp4',
+                        'https://files.catbox.moe/8tczgh.mp4',
+                        'https://files.catbox.moe/tqz3g4.mp4',
+                        'https://files.catbox.moe/ahvf6o.mp4'
+                    ],
+                    isVideoLoading: false
                 },
                 kuiz: {
                     currentQuestion: null,
@@ -531,17 +542,6 @@
                     error: null,
                     countdown: null,
                     nextPrayer: null
-                },
-                clipz: {
-                    videos: [
-                        'https://files.catbox.moe/yn4dut.mp4',
-                        'https://files.catbox.moe/qwwqwj.mp4',
-                        'https://files.catbox.moe/8tczgh.mp4',
-                        'https://files.catbox.moe/tqz3g4.mp4',
-                        'https://files.catbox.moe/ahvf6o.mp4'
-                    ],
-                    currentVideoIndex: 0,
-                    isPlaying: false
                 }
             };
 
@@ -614,7 +614,6 @@
                 XCircle: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`,
                 RotateCcw: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`,
                 Play: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><polygon points="5,3 19,12 5,21"/></svg>`,
-                RefreshCw: (cn = "") => `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${cn}"><path d="M3 12a9 9 0 1 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 1 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>`,
             };
 
             // === Hijri Date Converter (Algoritma yang Lebih Akurat) ===
@@ -837,315 +836,154 @@
                 render();
             };
 
-            // === Sistem Clipz ===
-            let currentVideoElement = null;
-            let videoInitialized = false;
-            let isVideoTransitioning = false;
-            let lastSwipeTime = 0;
 
-            const cleanupCurrentVideo = () => {
-                if (currentVideoElement) {
-                    try {
-                        currentVideoElement.pause();
-                        currentVideoElement.currentTime = 0;
-                        currentVideoElement.src = '';
-                        currentVideoElement.load();
-                        currentVideoElement.removeEventListener('loadstart', handleVideoLoadStart);
-                        currentVideoElement.removeEventListener('loadeddata', handleVideoLoadedData);
-                        currentVideoElement.removeEventListener('canplay', handleVideoCanPlay);
-                        currentVideoElement.removeEventListener('error', handleVideoError);
-                        currentVideoElement.removeEventListener('ended', handleVideoEnded);
-                        currentVideoElement.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
-                    } catch (e) {
-                        console.log('Error during video cleanup:', e);
-                    }
-                    currentVideoElement = null;
-                }
-                videoInitialized = false;
-                isVideoTransitioning = false;
-            };
 
-            const handleVideoLoadStart = () => {
-                const loadingIndicator = document.getElementById('video-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.classList.remove('hidden');
-                }
-                console.log('Video load started');
-            };
-
-            const handleVideoLoadedData = () => {
-                console.log('Video data loaded successfully');
-            };
-
-            const handleVideoLoadedMetadata = () => {
-                console.log('Video metadata loaded');
-                if (currentVideoElement) {
-                    // Pastikan video memiliki dimensi yang benar
-                    currentVideoElement.style.width = '100%';
-                    currentVideoElement.style.height = '100%';
-                    currentVideoElement.style.objectFit = 'cover';
-                    currentVideoElement.style.backgroundColor = '#000000';
-                }
-            };
-
-            const handleVideoCanPlay = () => {
-                const loadingIndicator = document.getElementById('video-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.classList.add('hidden');
-                }
-
-                if (currentVideoElement && !videoInitialized && state.activeScreen === 'clipz') {
-                    videoInitialized = true;
-                    console.log('Video ready to play');
-
-                    // Pastikan video properties
-                    currentVideoElement.style.display = 'block';
-                    currentVideoElement.style.opacity = '1';
-                    currentVideoElement.style.visibility = 'visible';
-                    currentVideoElement.style.backgroundColor = '#000000';
-                    currentVideoElement.style.width = '100%';
-                    currentVideoElement.style.height = '100%';
-                    currentVideoElement.style.objectFit = 'cover';
-                    currentVideoElement.style.zIndex = '1';
-
-                    // Show tap to unmute indicator dari awal
-                    const tapIndicator = document.getElementById('tap-to-unmute');
-                    if (tapIndicator) {
-                        tapIndicator.classList.remove('hidden');
-                    }
-
-                    // Play video muted untuk menghindari autoplay prevention
-                    const attemptPlay = async () => {
-                        if (!currentVideoElement || isVideoTransitioning) return;
-
-                        try {
-                            // Pastikan video sudah ready dan mulai muted
-                            if (currentVideoElement.readyState >= 2) {
-                                currentVideoElement.muted = true;
-                                await currentVideoElement.play();
-                                console.log('Video playing muted');
-
-                                // Setup auto-unmute on interaction
-                                const enableAudio = () => {
-                                    if (currentVideoElement) {
-                                        currentVideoElement.muted = false;
-                                        currentVideoElement.volume = 0.8;
-                                        const tapIndicator = document.getElementById('tap-to-unmute');
-                                        if (tapIndicator) tapIndicator.classList.add('hidden');
-                                    }
-                                };
-
-                                document.addEventListener('click', enableAudio, { once: true });
-                                document.addEventListener('touchstart', enableAudio, { once: true });
-                            } else {
-                                // Tunggu video ready
-                                setTimeout(attemptPlay, 300);
-                            }
-                        } catch (error) {
-                            console.error("Video play failed:", error);
-                            // Try next video if current one fails
-                            if (state.clipz.videos.length > 1) {
-                                setTimeout(() => playNextVideo(), 1000);
-                            }
-                        }
-                    };
-
-                    // Delay untuk memastikan DOM ready
-                    setTimeout(attemptPlay, 300);
-                }
-            };
-
-            const handleVideoError = (e) => {
-                console.error('Video error:', e);
-                isVideoTransitioning = false;
-                const loadingIndicator = document.getElementById('video-loading');
-                if (loadingIndicator) {
-                    loadingIndicator.innerHTML = `
-                        <div class="text-white text-center">
-                            <p class="text-sm mb-2">Gagal memuat video</p>
-                            <button onclick="window.location.reload()" class="px-4 py-2 bg-white/20 rounded-lg text-sm hover:bg-white/30">
-                                Muat Ulang
-                            </button>
-                        </div>
-                    `;
-                }
-            };
-
-            const handleVideoEnded = () => {
-                if (!isVideoTransitioning) {
-                    playNextVideo();
-                }
-            };
-
-            const initializeVideo = () => {
-                if (state.activeScreen !== 'clipz') return;
-
-                const video = document.getElementById('clipz-video');
-                const loadingIndicator = document.getElementById('video-loading');
-
-                if (video) {
-                    // Cleanup previous video jika ada
-                    if (currentVideoElement && currentVideoElement !== video) {
-                        cleanupCurrentVideo();
-                    }
-
-                    currentVideoElement = video;
-                    videoInitialized = false;
-
-                    // Show loading indicator dulu
-                    if (loadingIndicator) {
-                        loadingIndicator.classList.remove('hidden');
-                        loadingIndicator.innerHTML = `
-                            <div class="text-white text-center">
-                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                                <p class="text-sm">Memuat video...</p>
-                            </div>
-                        `;
-                    }
-
-                    // Reset semua properties video
-                    try {
-                        video.pause();
-                        video.currentTime = 0;
-                        video.muted = true; // Start muted untuk menghindari autoplay issues
-                        video.volume = 0.8;
-                        video.preload = 'metadata';
-                        video.playsInline = true;
-                        video.loop = true;
-                        video.controls = false;
-                        video.autoplay = false;
-
-                        // Set styling dengan force
-                        video.style.cssText = `
-                            display: block !important;
-                            opacity: 1 !important;
-                            visibility: visible !important;
-                            width: 100% !important;
-                            height: 100% !important;
-                            object-fit: cover !important;
-                            background-color: #000000 !important;
-                            position: absolute !important;
-                            top: 0 !important;
-                            left: 0 !important;
-                            z-index: 1 !important;
-                        `;
-
-                        // Remove existing event listeners
-                        video.removeEventListener('loadstart', handleVideoLoadStart);
-                        video.removeEventListener('loadeddata', handleVideoLoadedData);
-                        video.removeEventListener('loadedmetadata', handleVideoLoadedMetadata);
-                        video.removeEventListener('canplay', handleVideoCanPlay);
-                        video.removeEventListener('error', handleVideoError);
-                        video.removeEventListener('ended', handleVideoEnded);
-
-                        // Add fresh event listeners
-                        video.addEventListener('loadstart', handleVideoLoadStart);
-                        video.addEventListener('loadeddata', handleVideoLoadedData);
-                        video.addEventListener('loadedmetadata', handleVideoLoadedMetadata);
-                        video.addEventListener('canplay', handleVideoCanPlay);
-                        video.addEventListener('error', handleVideoError);
-                        video.addEventListener('ended', handleVideoEnded);
-
-                        // Force reload dengan src baru
-                        const currentSrc = state.clipz.videos[state.clipz.currentVideoIndex];
-                        
-                        // Test video URL terlebih dahulu
-                        const testVideo = document.createElement('video');
-                        testVideo.addEventListener('error', () => {
-                            console.error('Video URL error:', currentSrc);
-                            // Skip to next video if current one is broken
-                            if (state.clipz.videos.length > 1) {
-                                playNextVideo();
-                            }
-                        });
-                        testVideo.src = currentSrc;
-                        
-                        video.src = '';
-                        video.src = currentSrc;
-                        video.load();
-
-                        console.log('Initializing video:', currentSrc);
-
-                    } catch (error) {
-                        console.error('Error initializing video:', error);
-                        isVideoTransitioning = false;
-                        // Try next video if there's an error
-                        if (state.clipz.videos.length > 1) {
-                            setTimeout(() => playNextVideo(), 1000);
-                        }
-                    }
-                }
-            };
-
-            // Shuffle videos automatically when entering Clipz
-            const autoShuffleVideos = () => {
-                // Shuffle array videos dengan algoritma Fisher-Yates
-                const videos = [...state.clipz.videos];
-                for (let i = videos.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [videos[i], videos[j]] = [videos[j], videos[i]];
-                }
+            // === Database Kota Indonesia ===
+            const INDONESIA_CITIES = [
+                // Pulau Jawa
+                { name: 'Jakarta', lat: -6.2088, lon: 106.8456, province: 'DKI Jakarta' },
+                { name: 'Surabaya', lat: -7.2575, lon: 112.7521, province: 'Jawa Timur' },
+                { name: 'Bandung', lat: -6.9175, lon: 107.6191, province: 'Jawa Barat' },
+                { name: 'Bekasi', lat: -6.2383, lon: 106.9756, province: 'Jawa Barat' },
+                { name: 'Medan', lat: 3.5952, lon: 98.6722, province: 'Sumatera Utara' },
+                { name: 'Tangerang', lat: -6.1783, lon: 106.6319, province: 'Banten' },
+                { name: 'Depok', lat: -6.4025, lon: 106.7942, province: 'Jawa Barat' },
+                { name: 'Semarang', lat: -6.9667, lon: 110.4167, province: 'Jawa Tengah' },
+                { name: 'Palembang', lat: -2.9761, lon: 104.7754, province: 'Sumatera Selatan' },
+                { name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan' },
+                { name: 'South Tangerang', lat: -6.2878, lon: 106.7306, province: 'Banten' },
+                { name: 'Batam', lat: 1.0456, lon: 104.0305, province: 'Kepulauan Riau' },
+                { name: 'Bogor', lat: -6.5950, lon: 106.8167, province: 'Jawa Barat' },
+                { name: 'Pekanbaru', lat: 0.5333, lon: 101.4500, province: 'Riau' },
+                { name: 'Bandar Lampung', lat: -5.4292, lon: 105.2610, province: 'Lampung' },
                 
-                // Update state dengan urutan baru
-                state.clipz.videos = videos;
-                state.clipz.currentVideoIndex = 0;
+                // Sumatera
+                { name: 'Padang', lat: -0.9492, lon: 100.3543, province: 'Sumatera Barat' },
+                { name: 'Malang', lat: -7.9797, lon: 112.6304, province: 'Jawa Timur' },
+                { name: 'Samarinda', lat: -0.5018, lon: 117.1536, province: 'Kalimantan Timur' },
+                { name: 'Tasikmalaya', lat: -7.3506, lon: 108.2170, province: 'Jawa Barat' },
+                { name: 'Banjarmasin', lat: -3.3194, lon: 114.5901, province: 'Kalimantan Selatan' },
+                { name: 'Pontianak', lat: -0.0263, lon: 109.3425, province: 'Kalimantan Barat' },
+                { name: 'Cimahi', lat: -6.8722, lon: 107.5423, province: 'Jawa Barat' },
+                { name: 'Denpasar', lat: -8.6500, lon: 115.2167, province: 'Bali' },
+                { name: 'Balikpapan', lat: -1.2379, lon: 116.8529, province: 'Kalimantan Timur' },
+                { name: 'Jambi', lat: -1.6101, lon: 103.6131, province: 'Jambi' },
+                { name: 'Surakarta', lat: -7.5667, lon: 110.8333, province: 'Jawa Tengah' },
+                { name: 'Yogyakarta', lat: -7.7956, lon: 110.3695, province: 'DI Yogyakarta' },
+                { name: 'Kupang', lat: -10.1772, lon: 123.6070, province: 'Nusa Tenggara Timur' },
+                { name: 'Cirebon', lat: -6.7063, lon: 108.5570, province: 'Jawa Barat' },
+                { name: 'Serang', lat: -6.1169, lon: 106.1539, province: 'Banten' },
+                { name: 'Mataram', lat: -8.5833, lon: 116.1167, province: 'Nusa Tenggara Barat' },
                 
-                console.log('Videos automatically shuffled, first video:', state.clipz.videos[0]);
-            };
+                // Kalimantan
+                { name: 'Palangka Raya', lat: -2.2136, lon: 113.9230, province: 'Kalimantan Tengah' },
+                { name: 'Manado', lat: 1.4748, lon: 124.8421, province: 'Sulawesi Utara' },
+                { name: 'Ambon', lat: -3.6954, lon: 128.1814, province: 'Maluku' },
+                { name: 'Jayapura', lat: -2.5489, lon: 140.7000, province: 'Papua' },
+                { name: 'Kendari', lat: -3.9450, lon: 122.4989, province: 'Sulawesi Tenggara' },
+                { name: 'Palu', lat: -0.8917, lon: 119.8707, province: 'Sulawesi Tengah' },
+                { name: 'Gorontalo', lat: 0.5435, lon: 123.0682, province: 'Gorontalo' },
+                { name: 'Mamuju', lat: -2.6797, lon: 118.8878, province: 'Sulawesi Barat' },
+                { name: 'Ternate', lat: 0.7886, lon: 127.3784, province: 'Maluku Utara' },
+                { name: 'Bengkulu', lat: -3.8004, lon: 102.2655, province: 'Bengkulu' },
+                { name: 'Banda Aceh', lat: 5.5483, lon: 95.3238, province: 'Aceh' },
+                
+                // Kota-kota Besar Lainnya
+                { name: 'Cilegon', lat: -6.0022, lon: 106.0194, province: 'Banten' },
+                { name: 'Sukabumi', lat: -6.9278, lon: 106.9319, province: 'Jawa Barat' },
+                { name: 'Cirebon', lat: -6.7325, lon: 108.5570, province: 'Jawa Barat' },
+                { name: 'Purwokerto', lat: -7.4217, lon: 109.2339, province: 'Jawa Tengah' },
+                { name: 'Magelang', lat: -7.4700, lon: 110.2167, province: 'Jawa Tengah' },
+                { name: 'Tegal', lat: -6.8694, lon: 109.1403, province: 'Jawa Tengah' },
+                { name: 'Pekalongan', lat: -6.8886, lon: 109.6753, province: 'Jawa Tengah' },
+                { name: 'Kediri', lat: -7.8167, lon: 112.0167, province: 'Jawa Timur' },
+                { name: 'Blitar', lat: -8.0983, lon: 112.1681, province: 'Jawa Timur' },
+                { name: 'Mojokerto', lat: -7.4667, lon: 112.4333, province: 'Jawa Timur' },
+                { name: 'Madiun', lat: -7.6297, lon: 111.5239, province: 'Jawa Timur' },
+                { name: 'Jember', lat: -8.1667, lon: 113.7000, province: 'Jawa Timur' },
+                { name: 'Banyuwangi', lat: -8.2192, lon: 114.3689, province: 'Jawa Timur' },
+                { name: 'Probolinggo', lat: -7.7542, lon: 113.2156, province: 'Jawa Timur' },
+                
+                // Sumatera Lengkap
+                { name: 'Binjai', lat: 3.6000, lon: 98.4833, province: 'Sumatera Utara' },
+                { name: 'Pematangsiantar', lat: 2.9667, lon: 99.0667, province: 'Sumatera Utara' },
+                { name: 'Tebing Tinggi', lat: 3.3333, lon: 99.1667, province: 'Sumatera Utara' },
+                { name: 'Dumai', lat: 1.6667, lon: 101.4500, province: 'Riau' },
+                { name: 'Bukittinggi', lat: -0.3000, lon: 100.3700, province: 'Sumatera Barat' },
+                { name: 'Solok', lat: -0.7917, lon: 100.6583, province: 'Sumatera Barat' },
+                { name: 'Payakumbuh', lat: -0.2167, lon: 100.6333, province: 'Sumatera Barat' },
+                { name: 'Lubuklinggau', lat: -3.3000, lon: 102.8667, province: 'Sumatera Selatan' },
+                { name: 'Prabumulih', lat: -3.4333, lon: 104.2333, province: 'Sumatera Selatan' },
+                { name: 'Metro', lat: -5.1139, lon: 105.3067, province: 'Lampung' },
+                
+                // Kalimantan Lengkap
+                { name: 'Tarakan', lat: 3.3000, lon: 117.6333, province: 'Kalimantan Utara' },
+                { name: 'Bontang', lat: 0.1333, lon: 117.5000, province: 'Kalimantan Timur' },
+                { name: 'Singkawang', lat: 0.9000, lon: 108.9833, province: 'Kalimantan Barat' },
+                
+                // Sulawesi
+                { name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan' },
+                { name: 'Pare-Pare', lat: -4.0167, lon: 119.6333, province: 'Sulawesi Selatan' },
+                { name: 'Palopo', lat: -2.9833, lon: 120.2000, province: 'Sulawesi Selatan' },
+                { name: 'Bitung', lat: 1.4500, lon: 125.1833, province: 'Sulawesi Utara' },
+                { name: 'Tomohon', lat: 1.3333, lon: 124.8333, province: 'Sulawesi Utara' },
+                { name: 'Kotamobagu', lat: 0.7333, lon: 124.3167, province: 'Sulawesi Utara' },
+                { name: 'Bau-Bau', lat: -5.4833, lon: 122.6000, province: 'Sulawesi Tenggara' },
+                
+                // Nusa Tenggara & Maluku
+                { name: 'Singaraja', lat: -8.1167, lon: 115.0833, province: 'Bali' },
+                { name: 'Bima', lat: -8.4667, lon: 118.7167, province: 'Nusa Tenggara Barat' },
+                { name: 'Ende', lat: -8.8500, lon: 121.6667, province: 'Nusa Tenggara Timur' },
+                { name: 'Maumere', lat: -8.6167, lon: 122.2167, province: 'Nusa Tenggara Timur' },
+                { name: 'Tual', lat: -5.6333, lon: 132.7500, province: 'Maluku' },
+                { name: 'Tidore', lat: 0.6833, lon: 127.4000, province: 'Maluku Utara' },
+                
+                // Papua
+                { name: 'Sorong', lat: -0.8667, lon: 131.2500, province: 'Papua Barat' },
+                { name: 'Merauke', lat: -8.4833, lon: 140.4000, province: 'Papua' },
+                { name: 'Nabire', lat: -3.3667, lon: 135.5000, province: 'Papua' },
+                { name: 'Timika', lat: -4.5333, lon: 136.8833, province: 'Papua' },
+                { name: 'Biak', lat: -1.1833, lon: 136.0833, province: 'Papua' },
+                { name: 'Wamena', lat: -4.1000, lon: 138.9500, province: 'Papua' },
+                
+                // Kota-kota Tambahan
+                { name: 'Indramayu', lat: -6.3264, lon: 108.3200, province: 'Jawa Barat' },
+                { name: 'Garut', lat: -7.2125, lon: 107.9000, province: 'Jawa Barat' },
+                { name: 'Banjar', lat: -7.3667, lon: 108.5333, province: 'Jawa Barat' },
+                { name: 'Subang', lat: -6.5667, lon: 107.7500, province: 'Jawa Barat' },
+                { name: 'Purwakarta', lat: -6.5500, lon: 107.4333, province: 'Jawa Barat' },
+                { name: 'Karawang', lat: -6.3000, lon: 107.3000, province: 'Jawa Barat' },
+                { name: 'Cianjur', lat: -6.8167, lon: 107.1333, province: 'Jawa Barat' },
+                { name: 'Kuningan', lat: -6.9833, lon: 108.4833, province: 'Jawa Barat' },
+                { name: 'Wonogiri', lat: -7.8167, lon: 110.9167, province: 'Jawa Tengah' },
+                { name: 'Klaten', lat: -7.7056, lon: 110.6056, province: 'Jawa Tengah' },
+                { name: 'Boyolali', lat: -7.5333, lon: 110.5833, province: 'Jawa Tengah' },
+                { name: 'Sukoharjo', lat: -7.6833, lon: 110.8333, province: 'Jawa Tengah' },
+                { name: 'Karanganyar', lat: -7.6000, lon: 111.0333, province: 'Jawa Tengah' },
+                { name: 'Sragen', lat: -7.4167, lon: 111.0000, province: 'Jawa Tengah' },
+                { name: 'Gresik', lat: -7.1556, lon: 112.6536, province: 'Jawa Timur' },
+                { name: 'Sidoarjo', lat: -7.4486, lon: 112.7181, province: 'Jawa Timur' },
+                { name: 'Pasuruan', lat: -7.6453, lon: 112.9075, province: 'Jawa Timur' },
+                { name: 'Lumajang', lat: -8.1333, lon: 113.2167, province: 'Jawa Timur' },
+                { name: 'Bondowoso', lat: -7.9167, lon: 113.8167, province: 'Jawa Timur' },
+                { name: 'Situbondo', lat: -7.7056, lon: 114.0097, province: 'Jawa Timur' },
+                { name: 'Ngawi', lat: -7.4042, lon: 111.4464, province: 'Jawa Timur' },
+                { name: 'Magetan', lat: -7.6167, lon: 111.3500, province: 'Jawa Timur' },
+                { name: 'Pacitan', lat: -8.2000, lon: 111.0833, province: 'Jawa Timur' },
+                { name: 'Ponorogo', lat: -7.8667, lon: 111.4667, province: 'Jawa Timur' },
+                { name: 'Trenggalek', lat: -8.0500, lon: 111.7167, province: 'Jawa Timur' },
+                { name: 'Tulungagung', lat: -8.0667, lon: 111.9000, province: 'Jawa Timur' }
+            ];
 
-            const playNextVideo = () => {
-                // Prevent rapid swipes dengan waktu lebih lama
-                const now = Date.now();
-                if (isVideoTransitioning || (now - lastSwipeTime) < 1500) return;
-
-                lastSwipeTime = now;
-                isVideoTransitioning = true;
-
-                console.log('Playing next video...');
-
-                // Cleanup video saat ini dengan aman
-                cleanupCurrentVideo();
-
-                // Pindah ke video berikutnya
-                state.clipz.currentVideoIndex = (state.clipz.currentVideoIndex + 1) % state.clipz.videos.length;
-
-                console.log('Next video index:', state.clipz.currentVideoIndex);
-
-                // Render ulang
-                render();
-
-                // Tunggu DOM ready dan inisialisasi video baru
-                setTimeout(() => {
-                    initializeVideo();
-                }, 800);
-            };
-
-            const playPrevVideo = () => {
-                // Prevent rapid swipes dengan waktu lebih lama
-                const now = Date.now();
-                if (isVideoTransitioning || (now - lastSwipeTime) < 1500) return;
-
-                lastSwipeTime = now;
-                isVideoTransitioning = true;
-
-                console.log('Playing previous video...');
-
-                // Cleanup video saat ini dengan aman
-                cleanupCurrentVideo();
-
-                // Pindah ke video sebelumnya
-                state.clipz.currentVideoIndex = state.clipz.currentVideoIndex === 0 ? 
-                    state.clipz.videos.length - 1 : state.clipz.currentVideoIndex - 1;
-
-                console.log('Previous video index:', state.clipz.currentVideoIndex);
-
-                // Render ulang
-                render();
-
-                // Tunggu DOM ready dan inisialisasi video baru
-                setTimeout(() => {
-                    initializeVideo();
-                }, 800);
+            // Fungsi untuk mencari kota
+            const searchCity = (query) => {
+                if (!query || query.trim().length < 2) return [];
+                
+                const searchTerm = query.toLowerCase().trim();
+                return INDONESIA_CITIES.filter(city => 
+                    city.name.toLowerCase().includes(searchTerm) ||
+                    city.province.toLowerCase().includes(searchTerm)
+                ).slice(0, 10); // Batasi hasil maksimal 10
             };
 
             // === Sistem Jadwal Sholat ===
@@ -1158,25 +996,38 @@
                     let lat, lon, detectedCity = '', regionName = '';
 
                     if (city.trim()) {
-                        // Jika city diisi, coba gunakan geocoding untuk mendapatkan koordinat
-                        try {
-                            const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city + ', Indonesia')}&key=demo&limit=1`;
-                            const geocodeResponse = await fetch(geocodeUrl);
-                            const geocodeData = await geocodeResponse.json();
+                        // Cari di database kota lokal terlebih dahulu
+                        const cityData = INDONESIA_CITIES.find(c => 
+                            c.name.toLowerCase() === city.toLowerCase().trim()
+                        );
 
-                            if (geocodeData.results && geocodeData.results.length > 0) {
-                                const result = geocodeData.results[0];
-                                lat = result.geometry.lat;
-                                lon = result.geometry.lng;
-                                state.prayerTimes.location = city;
-                            } else {
-                                throw new Error('Kota tidak ditemukan');
+                        if (cityData) {
+                            // Gunakan data dari database lokal
+                            lat = cityData.lat;
+                            lon = cityData.lon;
+                            state.prayerTimes.location = `${cityData.name}, ${cityData.province}`;
+                        } else {
+                            // Jika tidak ditemukan di database lokal, coba geocoding
+                            try {
+                                const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city + ', Indonesia')}&key=demo&limit=1`;
+                                const geocodeResponse = await fetch(geocodeUrl);
+                                const geocodeData = await geocodeResponse.json();
+
+                                if (geocodeData.results && geocodeData.results.length > 0) {
+                                    const result = geocodeData.results[0];
+                                    lat = result.geometry.lat;
+                                    lon = result.geometry.lng;
+                                    state.prayerTimes.location = `${city} (geocoded)`;
+                                } else {
+                                    throw new Error('Kota tidak ditemukan');
+                                }
+                            } catch (geocodeError) {
+                                // Fallback ke Jakarta jika tidak ditemukan
+                                const jakartaData = INDONESIA_CITIES.find(c => c.name === 'Jakarta');
+                                lat = jakartaData.lat;
+                                lon = jakartaData.lon;
+                                state.prayerTimes.location = `${city} (menggunakan Jakarta sebagai referensi)`;
                             }
-                        } catch (geocodeError) {
-                            // Fallback ke koordinat Jakarta jika geocoding gagal
-                            lat = -6.2088;
-                            lon = 106.8456;
-                            state.prayerTimes.location = city + ' (perkiraan)';
                         }
                     } else {
                         // Dapatkan lokasi berdasarkan IP dengan fallback
@@ -1195,9 +1046,10 @@
                                 throw new Error('Gagal mendeteksi lokasi');
                             }
                         } catch (ipError) {
-                            // Fallback ke koordinat Jakarta
-                            lat = -6.2088;
-                            lon = 106.8456;
+                            // Fallback ke Jakarta
+                            const jakartaData = INDONESIA_CITIES.find(c => c.name === 'Jakarta');
+                            lat = jakartaData.lat;
+                            lon = jakartaData.lon;
                             state.prayerTimes.location = 'Jakarta (default)';
                         }
                     }
@@ -1332,6 +1184,49 @@
                 } catch (error) {
                     console.error('Error updating countdown:', error);
                     state.prayerTimes.countdown = null;
+                }
+            };
+
+            // === Sistem Tap Clipz ===
+            const getRandomVideo = () => {
+                playClickSound();
+                state.tapClipz.isVideoLoading = true;
+                render();
+
+                // Pilih video random
+                const randomIndex = Math.floor(Math.random() * state.tapClipz.videos.length);
+                state.tapClipz.currentVideoIndex = randomIndex;
+
+                // Simulasi loading untuk user experience yang lebih baik
+                setTimeout(() => {
+                    state.tapClipz.isVideoLoading = false;
+                    render();
+                }, 500);
+            };
+
+            // === Fungsi untuk City Search Dropdown ===
+            const showCityDropdown = (cities) => {
+                const dropdown = document.getElementById('city-search-dropdown');
+                if (!dropdown) return;
+
+                if (cities.length === 0) {
+                    dropdown.innerHTML = '<div class="p-3 text-center text-slate-500 dark:text-slate-400 text-sm">Kota tidak ditemukan</div>';
+                } else {
+                    dropdown.innerHTML = cities.map(city => `
+                        <div class="city-option p-3 hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer border-b border-slate-100 dark:border-slate-600 last:border-b-0" data-city-name="${city.name}">
+                            <div class="font-medium text-slate-800 dark:text-white">${city.name}</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">${city.province}</div>
+                        </div>
+                    `).join('');
+                }
+
+                dropdown.classList.remove('hidden');
+            };
+
+            const hideCityDropdown = () => {
+                const dropdown = document.getElementById('city-search-dropdown');
+                if (dropdown) {
+                    dropdown.classList.add('hidden');
                 }
             };
 
@@ -1669,60 +1564,44 @@
                 `;
             };
 
-            const renderClipzScreen = () => {
-                const currentVideo = state.clipz.videos[state.clipz.currentVideoIndex];
+
+
+            const renderTapClipzScreen = () => {
+                const { tapClipz } = state;
+                const currentVideo = tapClipz.videos[tapClipz.currentVideoIndex];
+
+                if (tapClipz.isVideoLoading) {
+                    return `
+                        <div class="p-4 sm:p-6 h-full flex flex-col justify-center items-center">
+                            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+                            <p class="mt-4 text-slate-500 dark:text-slate-400">Memuat video...</p>
+                        </div>
+                    `;
+                }
 
                 return `
-                    <div class="h-full flex flex-col bg-black relative" id="clipz-container">
-                        <!-- Header -->
-                        <div class="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
-                            <div class="flex justify-center items-center">
-                                <h1 class="text-white text-xl font-bold">Clipz</h1>
-                            </div>
+                    <div class="p-4 sm:p-6 space-y-6">
+                        <!-- Header Tap Clipz -->
+                        <div class="text-center mb-6">
+                            ${icons.Play("mx-auto h-12 w-12 text-pink-500 mb-4")}
+                            <h1 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Tap Clipz</h1>
+                            <p class="text-slate-600 dark:text-slate-300">Video Inspiratif Muslimah</p>
                         </div>
 
-                        <!-- Video Container -->
-                        <div class="flex-1 relative bg-black overflow-hidden" id="video-wrapper">
-                            <video 
-                                id="clipz-video" 
-                                src="${currentVideo}" 
-                                class="absolute inset-0 w-full h-full object-cover"
-                                loop 
-                                autoplay
-                                playsinline
-                                preload="metadata"
-                                controls="false"
-                                style="background-color: #000000; z-index: 1;"
-                            ></video>
-
-                            <!-- Loading Indicator -->
-                            <div id="video-loading" class="absolute inset-0 flex items-center justify-center bg-black z-20">
-                                <div class="text-white text-center">
-                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
-                                    <p class="text-sm">Memuat video...</p>
-                                </div>
-                            </div>
-
-                            <!-- Tap to Unmute Overlay -->
-                            <div id="tap-to-unmute" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm z-30 hidden">
-                                Ketuk untuk mendengar suara
-                            </div>
-
-                            <!-- Swipe Overlay -->
-                            <div id="swipe-overlay" class="absolute inset-0 z-10"></div>
-                        </div>
-
-                        <!-- Video Indicators -->
-                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 flex flex-col gap-2">
-                            ${state.clipz.videos.map((_, index) => `
-                                <div class="w-1 h-8 rounded-full ${index === state.clipz.currentVideoIndex ? 'bg-white' : 'bg-white/30'}"></div>
-                            `).join('')}
-                        </div>
-
-                        <!-- Video Controls -->
-                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 hidden">
-                            <div class="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm">
-                                Video ${state.clipz.currentVideoIndex + 1} dari ${state.clipz.videos.length}
+                        <!-- Video Player -->
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50 p-6">
+                            <div class="aspect-video bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden">
+                                <video 
+                                    id="tap-clipz-video"
+                                    class="w-full h-full object-cover"
+                                    controls
+                                    autoplay
+                                    preload="metadata"
+                                    poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect width='400' height='225' fill='%23f1f5f9'/%3E%3Ctext x='200' y='112' text-anchor='middle' fill='%23475569' font-family='Arial' font-size='16'%3EMemuat Video...%3C/text%3E%3C/svg%3E"
+                                >
+                                    <source src="${currentVideo}" type="video/mp4">
+                                    Browser Anda tidak mendukung pemutar video.
+                                </video>
                             </div>
                         </div>
                     </div>
@@ -2194,18 +2073,32 @@
 
                             <!-- City Search -->
                             <div class="mb-4">
-                                <div class="flex gap-2">
-                                    <input 
-                                        id="city-search-input" 
-                                        type="text" 
-                                        placeholder="Cari kota (opsional)" 
-                                        class="flex-grow px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800 dark:text-white text-sm"
-                                    />
-                                    <button id="search-city-btn" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm">
-                                        Cari
-                                    </button>
+                                <div class="relative">
+                                    <div class="flex gap-2">
+                                        <div class="flex-grow relative">
+                                            <input 
+                                                id="city-search-input" 
+                                                type="text" 
+                                                placeholder="Ketik nama kota di Indonesia..." 
+                                                class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800 dark:text-white text-sm"
+                                                autocomplete="off"
+                                            />
+                                            <!-- Dropdown hasil pencarian -->
+                                            <div id="city-search-dropdown" class="absolute top-full left-0 right-0 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto hidden">
+                                                <!-- Hasil pencarian akan muncul di sini -->
+                                            </div>
+                                        </div>
+                                        <button id="search-city-btn" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm">
+                                            Cari
+                                        </button>
+                                        <button id="clear-city-btn" class="px-3 py-2 bg-slate-300 dark:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors text-sm" title="Reset ke lokasi otomatis">
+                                            Reset
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        Database lengkap 98 kota di Indonesia. Kosongkan untuk deteksi lokasi otomatis.
+                                    </p>
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kosongkan untuk deteksi lokasi otomatis</p>
                             </div>
 
                             ${prayerTimesContent}
@@ -2240,7 +2133,7 @@
 
             const renderBottomNav = () => {
                 const navItems = [
-                    { id: 'clipz', label: 'Clipz', icon: icons.Play },
+                    { id: 'tap-clipz', label: 'Tap Clipz', icon: icons.Play },
                     { id: 'kuiz', label: 'Kuiz', icon: icons.BookOpen },
                     { id: 'calendar', label: 'Kalender', icon: icons.CalendarDays },
                     { id: 'tanya-cloud', label: 'Tanya Cloud', icon: icons.Cloudy },
@@ -2305,12 +2198,12 @@
                 state.activeScreen = screen;
                 state.showChatHistory = false;
                 
-                // Auto shuffle videos saat masuk ke Clipz screen
-                if (screen === 'clipz') {
-                    autoShuffleVideos();
+                // Auto-play video acak saat klik menu Tap Clipz
+                if (screen === 'tap-clipz') {
+                    getRandomVideo();
+                } else {
+                    render();
                 }
-                
-                render();
             };
             const changeMonth = (offset) => {
                 playClickSound();
@@ -2353,7 +2246,11 @@
                 // Update state userData dengan total debt yang benar
                 state.userData.fastingDebt = calculateAutomaticFastingDebt(state.userData) + state.userData.manualFastingDebt;
                 saveData();
-                closeModal();
+                
+                // Auto close modal setelah aksi berhasil
+                setTimeout(() => {
+                    closeModal();
+                }, 100);
             };
 
             const handleMarkEndPeriod = () => {
@@ -2371,7 +2268,11 @@
                 }
 
                 saveData();
-                closeModal();
+                
+                // Auto close modal setelah aksi berhasil
+                setTimeout(() => {
+                    closeModal();
+                }, 100);
             };
 
             const handleDebtChange = (amount) => {
@@ -2495,7 +2396,9 @@
                     const dayElement = target.closest('.calendar-day');
                     if (dayElement?.dataset.date) return handleDayClick(dayElement.dataset.date);
 
-                    
+
+
+                    // Tap Clipz Screen events (none needed as auto-play is handled in setActiveScreen)
 
                     // Kuiz Screen
                     if (target.closest('#start-quiz-btn')) return getRandomQuestion();
@@ -2505,13 +2408,33 @@
                     if (target.closest('#reset-quiz-btn')) return resetQuiz();
 
                     // Settings Screen
-                    if (target.closest('#theme-toggle-btn')) return toggleTheme();
+                    if (target.closest('#theme-toggle-btn') || target.id === 'theme-toggle-btn') return toggleTheme();
                     if (target.closest('#load-prayer-times-btn')) return getPrayerTimes();
                     if (target.closest('#retry-prayer-times-btn')) return getPrayerTimes();
                     if (target.closest('#refresh-prayer-times-btn')) return getPrayerTimes(state.prayerTimes.location);
                     if (target.closest('#search-city-btn')) {
                         const cityInput = document.getElementById('city-search-input');
                         if (cityInput) return getPrayerTimes(cityInput.value);
+                    }
+                    if (target.closest('#clear-city-btn')) {
+                        const cityInput = document.getElementById('city-search-input');
+                        if (cityInput) {
+                            cityInput.value = '';
+                            hideCityDropdown();
+                        }
+                        return getPrayerTimes(''); // Reset ke deteksi otomatis
+                    }
+
+                    // City dropdown selection
+                    const cityOption = target.closest('.city-option');
+                    if (cityOption) {
+                        const cityName = cityOption.dataset.cityName;
+                        const cityInput = document.getElementById('city-search-input');
+                        if (cityInput && cityName) {
+                            cityInput.value = cityName;
+                            hideCityDropdown();
+                            return getPrayerTimes(cityName);
+                        }
                     }
 
                     // Tanya Cloud
@@ -2530,9 +2453,13 @@
 
                 // Listeners for modals which are appended directly to the body
                 document.body.addEventListener('click', e => {
-                    if (e.target.closest('#mark-start-period-btn')) return handleMarkStartPeriod();
-                    if (e.target.closest('#mark-end-period-btn')) return handleMarkEndPeriod();
-                    if (e.target.closest('#cancel-modal-btn')) return closeModal();
+                    // Modal actions
+                    if (e.target.closest('#mark-start-period-btn') || e.target.id === 'mark-start-period-btn') return handleMarkStartPeriod();
+                    if (e.target.closest('#mark-end-period-btn') || e.target.id === 'mark-end-period-btn') return handleMarkEndPeriod();
+                    if (e.target.closest('#cancel-modal-btn') || e.target.id === 'cancel-modal-btn') return closeModal();
+                    
+                    // Close modal when clicking on modal background
+                    if (e.target.id === 'menstruation-modal') return closeModal();
                 });
 
                 // Listeners for non-click events that don't bubble well for delegation
@@ -2542,107 +2469,32 @@
                         const sendButton = document.getElementById('send-button');
                         if (sendButton) sendButton.disabled = state.tanyaCloud.isLoading || !state.tanyaCloud.prompt.trim();
                     }
-                });
 
-                // Touch/Swipe event listeners untuk Clipz
-                let startY = 0;
-                let startTime = 0;
-                const minSwipeDistance = 100;
-                const maxSwipeTime = 600;
-                let lastTouchTime = 0;
-
-                appContainer.addEventListener('touchstart', e => {
-                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
-                        const touch = e.touches[0];
-                        startY = touch.clientY;
-                        startTime = Date.now();
-                    }
-                }, { passive: true });
-
-                appContainer.addEventListener('touchend', e => {
-                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
-                        const touch = e.changedTouches[0];
-                        const endY = touch.clientY;
-                        const endTime = Date.now();
-                        const deltaY = startY - endY;
-                        const deltaTime = endTime - startTime;
-
-                        // Prevent rapid successive swipes dengan waktu lebih lama
-                        if (endTime - lastTouchTime < 2000) return;
-
-                        if (Math.abs(deltaY) > minSwipeDistance && deltaTime < maxSwipeTime) {
-                            e.preventDefault();
-                            lastTouchTime = endTime;
-
-                            if (deltaY > 0) {
-                                // Swipe up - next video
-                                playNextVideo();
-                            } else {
-                                // Swipe down - previous video
-                                playPrevVideo();
-                            }
-                        } else if (deltaTime < 300 && Math.abs(deltaY) < 20) {
-                            // Tap to unmute/control video
-                            if (currentVideoElement && !isVideoTransitioning) {
-                                if (currentVideoElement.muted) {
-                                    currentVideoElement.muted = false;
-                                    currentVideoElement.volume = 0.8;
-                                    const tapIndicator = document.getElementById('tap-to-unmute');
-                                    if (tapIndicator) tapIndicator.classList.add('hidden');
-                                } else {
-                                    // Toggle play/pause
-                                    if (currentVideoElement.paused) {
-                                        currentVideoElement.play();
-                                    } else {
-                                        currentVideoElement.pause();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }, { passive: false });
-
-                // Click event untuk desktop
-                appContainer.addEventListener('click', e => {
-                    if (state.activeScreen === 'clipz' && e.target.closest('#swipe-overlay')) {
-                        if (currentVideoElement && !isVideoTransitioning) {
-                            if (currentVideoElement.muted) {
-                                currentVideoElement.muted = false;
-                                currentVideoElement.volume = 0.8;
-                                const tapIndicator = document.getElementById('tap-to-unmute');
-                                if (tapIndicator) tapIndicator.classList.add('hidden');
-                            } else {
-                                // Toggle play/pause
-                                if (currentVideoElement.paused) {
-                                    currentVideoElement.play();
-                                } else {
-                                    currentVideoElement.pause();
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Mouse wheel event untuk desktop
-                let lastWheelTime = 0;
-                appContainer.addEventListener('wheel', e => {
-                    if (state.activeScreen === 'clipz' && !isVideoTransitioning) {
-                        e.preventDefault();
-                        const now = Date.now();
-
-                        // Prevent rapid wheel events dengan waktu lebih lama
-                        if (now - lastWheelTime < 1500) return;
-                        lastWheelTime = now;
-
-                        if (e.deltaY > 0) {
-                            // Scroll down - next video
-                            playNextVideo();
+                    // City search autocomplete
+                    if (e.target.id === 'city-search-input') {
+                        const query = e.target.value;
+                        if (query.length >= 2) {
+                            const results = searchCity(query);
+                            showCityDropdown(results);
                         } else {
-                            // Scroll up - previous video
-                            playPrevVideo();
+                            hideCityDropdown();
                         }
                     }
-                }, { passive: false });
+                });
+
+                // Hide dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    const searchInput = document.getElementById('city-search-input');
+                    const dropdown = document.getElementById('city-search-dropdown');
+                    
+                    if (searchInput && dropdown && 
+                        !searchInput.contains(e.target) && 
+                        !dropdown.contains(e.target)) {
+                        hideCityDropdown();
+                    }
+                });
+
+
 
                 // Event listener untuk radio button kuiz
                 appContainer.addEventListener('change', e => {
@@ -2671,9 +2523,8 @@
                 mainContent.className = "flex-grow overflow-y-auto relative";
 
                 switch (state.activeScreen) {
-                    case 'clipz':
-                        mainContent.className = "flex-grow overflow-hidden relative";
-                        contentHtml = renderClipzScreen();
+                    case 'tap-clipz':
+                        contentHtml = renderHeader() + renderTapClipzScreen();
                         break;
                     case 'kuiz':
                         contentHtml = renderHeader() + renderKuizScreen();
@@ -2697,23 +2548,6 @@
                     const chatContainer = document.getElementById('chat-container');
                     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
-
-                // Setup video player untuk Clipz
-                if (state.activeScreen === 'clipz') {
-                    setTimeout(() => {
-                        initializeVideo();
-                        // Show tap to unmute indicator if video is muted
-                        setTimeout(() => {
-                            if (currentVideoElement && currentVideoElement.muted) {
-                                const tapIndicator = document.getElementById('tap-to-unmute');
-                                if (tapIndicator) tapIndicator.classList.remove('hidden');
-                            }
-                        }, 1000);
-                    }, 100);
-                } else {
-                    // Cleanup video ketika tidak di screen clipz
-                    cleanupCurrentVideo();
-                }
             };
 
             // --- App Initialization ---
@@ -2721,6 +2555,10 @@
                 loadData();
                 applyTheme();
                 addGlobalEventListeners(); // Listeners are now added only once
+                
+                // Inisialisasi video random pertama kali
+                getRandomVideo();
+                
                 render();
 
                 // Load prayer times if not available

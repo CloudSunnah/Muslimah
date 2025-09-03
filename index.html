@@ -665,8 +665,11 @@
 
                 if (userData.menstruationDates.length === 0) return predictions;
 
-                // Urutkan tanggal menstruasi
-                const sortedDates = userData.menstruationDates.map(d => new Date(d)).sort((a, b) => a - b);
+                // Urutkan tanggal menstruasi dengan parsing yang benar
+                const sortedDates = userData.menstruationDates.map(dateStr => {
+                    const parts = dateStr.split('-');
+                    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                }).sort((a, b) => a - b);
                 const lastPeriod = sortedDates[sortedDates.length - 1];
 
                 // Hitung rata-rata siklus dari 3 siklus terakhir atau default 28 hari
@@ -1404,16 +1407,20 @@
 
                     // Periksa apakah tanggal ini adalah prediksi haid berikutnya
                     const isNextPeriodPrediction = predictions.nextPeriod && 
-                        dateObj.toDateString() === predictions.nextPeriod.toDateString();
+                        dateObj.getFullYear() === predictions.nextPeriod.getFullYear() &&
+                        dateObj.getMonth() === predictions.nextPeriod.getMonth() &&
+                        dateObj.getDate() === predictions.nextPeriod.getDate();
 
                     // Periksa apakah tanggal ini dalam masa subur
                     const isFertileWindow = predictions.fertileWindow && 
-                        dateObj >= predictions.fertileWindow.start && 
-                        dateObj <= predictions.fertileWindow.end;
+                        dateObj.getTime() >= predictions.fertileWindow.start.getTime() && 
+                        dateObj.getTime() <= predictions.fertileWindow.end.getTime();
 
                     // Periksa apakah tanggal ini adalah ovulasi
                     const isOvulation = predictions.ovulation && 
-                        dateObj.toDateString() === predictions.ovulation.toDateString();
+                        dateObj.getFullYear() === predictions.ovulation.getFullYear() &&
+                        dateObj.getMonth() === predictions.ovulation.getMonth() &&
+                        dateObj.getDate() === predictions.ovulation.getDate();
 
                     let bgClass = '';
                     let indicators = '';
@@ -1572,7 +1579,7 @@
 
                 if (tapClipz.isVideoLoading) {
                     return `
-                        <div class="p-4 sm:p-6 h-full flex flex-col justify-center items-center">
+                        <div class="h-full flex flex-col justify-center items-center">
                             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
                             <p class="mt-4 text-slate-500 dark:text-slate-400">Memuat video...</p>
                         </div>
@@ -1580,29 +1587,20 @@
                 }
 
                 return `
-                    <div class="p-4 sm:p-6 space-y-6">
-                        <!-- Header Tap Clipz -->
-                        <div class="text-center mb-6">
-                            ${icons.Play("mx-auto h-12 w-12 text-pink-500 mb-4")}
-                            <h1 class="text-3xl font-bold text-slate-800 dark:text-white mb-2">Tap Clipz</h1>
-                            <p class="text-slate-600 dark:text-slate-300">Video Inspiratif Muslimah</p>
-                        </div>
-
-                        <!-- Video Player -->
-                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-rose-100/50 dark:shadow-slate-950/50 p-6">
-                            <div class="aspect-video bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden">
-                                <video 
-                                    id="tap-clipz-video"
-                                    class="w-full h-full object-cover"
-                                    controls
-                                    autoplay
-                                    preload="metadata"
-                                    poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect width='400' height='225' fill='%23f1f5f9'/%3E%3Ctext x='200' y='112' text-anchor='middle' fill='%23475569' font-family='Arial' font-size='16'%3EMemuat Video...%3C/text%3E%3C/svg%3E"
-                                >
-                                    <source src="${currentVideo}" type="video/mp4">
-                                    Browser Anda tidak mendukung pemutar video.
-                                </video>
-                            </div>
+                    <div class="h-full">
+                        <!-- Video Player Full Screen -->
+                        <div class="h-full bg-black">
+                            <video 
+                                id="tap-clipz-video"
+                                class="w-full h-full object-contain"
+                                controls
+                                autoplay
+                                preload="metadata"
+                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect width='400' height='225' fill='%23000000'/%3E%3Ctext x='200' y='112' text-anchor='middle' fill='%23ffffff' font-family='Arial' font-size='16'%3EMemuat Video...%3C/text%3E%3C/svg%3E"
+                            >
+                                <source src="${currentVideo}" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video.
+                            </video>
                         </div>
                     </div>
                 `;
@@ -2161,7 +2159,9 @@
 
             const renderModal = () => {
                 if (state.isModalOpen && state.selectedDate) {
-                    const date = new Date(state.selectedDate);
+                    // Perbaiki parsing tanggal untuk menghindari timezone offset
+                    const dateParts = state.selectedDate.split('-');
+                    const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
                     const isMarkedStart = state.userData.menstruationDates.includes(state.selectedDate);
                     const isMarkedEnd = state.userData.menstruationEndDates.includes(state.selectedDate);
 
@@ -2408,7 +2408,7 @@
                     if (target.closest('#reset-quiz-btn')) return resetQuiz();
 
                     // Settings Screen
-                    if (target.closest('#theme-toggle-btn') || target.id === 'theme-toggle-btn') return toggleTheme();
+                    if (target.closest('#theme-toggle-btn')) return toggleTheme();
                     if (target.closest('#load-prayer-times-btn')) return getPrayerTimes();
                     if (target.closest('#retry-prayer-times-btn')) return getPrayerTimes();
                     if (target.closest('#refresh-prayer-times-btn')) return getPrayerTimes(state.prayerTimes.location);
@@ -2524,7 +2524,7 @@
 
                 switch (state.activeScreen) {
                     case 'tap-clipz':
-                        contentHtml = renderHeader() + renderTapClipzScreen();
+                        contentHtml = renderTapClipzScreen();
                         break;
                     case 'kuiz':
                         contentHtml = renderHeader() + renderKuizScreen();

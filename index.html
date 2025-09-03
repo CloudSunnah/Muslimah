@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,22 +56,38 @@
         }
 
         @keyframes pulse-dot {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1.0);
+            }
         }
 
-        .animate-pulse-dot:nth-child(1) { animation-delay: -0.32s; }
-        .animate-pulse-dot:nth-child(2) { animation-delay: -0.16s; }
+        .animate-pulse-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .animate-pulse-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
     </style>
 </head>
+
 <body class="overflow-hidden">
 
     <!-- Login Screen -->
-    <div id="login-screen" class="w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[101] bg-gradient-to-br from-pink-500 via-rose-400 to-pink-600">
+    <div id="login-screen"
+        class="w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[101] bg-gradient-to-br from-pink-500 via-rose-400 to-pink-600">
         <div class="w-full max-w-md px-6">
             <!-- Logo/Title -->
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-white tracking-widest mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">MUSLIMAH</h1>
+                <h1 class="text-4xl font-bold text-white tracking-widest mb-2"
+                    style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">MUSLIMAH</h1>
                 <p class="text-white/80 text-lg">by CLOUD SUNNAH</p>
             </div>
 
@@ -81,25 +97,28 @@
 
                 <div class="space-y-4">
                     <div>
-                        <input id="login-email" type="email" placeholder="Email" 
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                        <input id="login-email" type="email" placeholder="Email"
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
                     <div>
                         <input id="login-password" type="password" placeholder="Password"
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
-                    <button id="login-btn" class="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors">
+                    <button id="login-btn"
+                        class="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition-colors">
                         Masuk
                     </button>
                 </div>
 
                 <div class="text-center mt-4">
-                    <p class="text-slate-600">Belum punya akun? 
-                        <button id="show-register-btn" class="text-pink-500 font-semibold hover:text-pink-600">Daftar di sini</button>
+                    <p class="text-slate-600">Belum punya akun?
+                        <button id="show-register-btn" class="text-pink-500 font-semibold hover:text-pink-600">Daftar di
+                            sini</button>
                     </p>
                 </div>
 
-                <div id="login-error" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+                <div id="login-error"
+                    class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
             </div>
 
             <!-- Register Form -->
@@ -108,34 +127,39 @@
 
                 <div class="space-y-4">
                     <div>
-                        <input id="register-name" type="text" placeholder="Nama Lengkap" 
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                        <input id="register-name" type="text" placeholder="Nama Lengkap"
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
                     <div>
-                        <input id="register-email" type="email" placeholder="Email" 
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                        <input id="register-email" type="email" placeholder="Email"
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
                     <div>
                         <input id="register-password" type="password" placeholder="Password (min. 6 karakter)"
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
                     <div>
                         <input id="register-confirm-password" type="password" placeholder="Konfirmasi Password"
-                               class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
+                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-slate-800">
                     </div>
-                    <button id="register-btn" class="w-full py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">
+                    <button id="register-btn"
+                        class="w-full py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors">
                         Daftar
                     </button>
                 </div>
 
                 <div class="text-center mt-4">
-                    <p class="text-slate-600">Sudah punya akun? 
-                        <button id="show-login-btn" class="text-pink-500 font-semibold hover:text-pink-600">Masuk di sini</button>
+                    <p class="text-slate-600">Sudah punya akun?
+                        <button id="show-login-btn" class="text-pink-500 font-semibold hover:text-pink-600">Masuk di
+                            sini</button>
                     </p>
                 </div>
 
-                <div id="register-error" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
-                <div id="register-success" class="hidden mt-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm"></div>
+                <div id="register-error"
+                    class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+                <div id="register-success"
+                    class="hidden mt-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm">
+                </div>
             </div>
 
             <!-- Waiting for Approval -->
@@ -143,12 +167,15 @@
                 <div class="text-center">
                     <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <h2 class="text-xl font-bold text-slate-800 mb-2">Menunggu Persetujuan</h2>
-                    <p class="text-slate-600 mb-4">Akun Anda sedang menunggu persetujuan dari admin. Anda akan dapat mengakses aplikasi setelah akun disetujui.</p>
-                    <button id="logout-btn" class="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors">
+                    <p class="text-slate-600 mb-4">Akun Anda sedang menunggu persetujuan dari admin. Anda akan dapat
+                        mengakses aplikasi setelah akun disetujui.</p>
+                    <button id="logout-btn"
+                        class="px-6 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors">
                         Keluar
                     </button>
                 </div>
@@ -163,20 +190,24 @@
     </div>
 
     <!-- Splash Screen -->
-    <div id="splash-screen" class="splash-screen w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[100] transition-opacity duration-500 hidden">
+    <div id="splash-screen"
+        class="splash-screen w-full h-screen flex flex-col justify-center items-center fixed inset-0 z-[100] transition-opacity duration-500 hidden">
         <div class="text-center">
-            <h1 class="text-5xl font-bold text-white tracking-widest" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">MUSLIMAH</h1>
+            <h1 class="text-5xl font-bold text-white tracking-widest" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.2)">
+                MUSLIMAH</h1>
             <p class="text-white/80 mt-2 text-lg">by CLOUD SUNNAH</p>
         </div>
         <div class="absolute bottom-10 text-white/70 text-sm">Loading...</div>
     </div>
 
     <!-- Main App Structure -->
-    <div id="app-container" class="font-sans antialiased w-full h-screen flex flex-col bg-rose-50 dark:bg-slate-900 main-container hidden">
+    <div id="app-container"
+        class="font-sans antialiased w-full h-screen flex flex-col bg-rose-50 dark:bg-slate-900 main-container hidden">
         <main id="main-content" class="flex-grow overflow-y-auto">
             <!-- Content will be rendered here by JavaScript -->
         </main>
-        <nav id="bottom-nav-bar" class="shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-700/80 rounded-t-3xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+        <nav id="bottom-nav-bar"
+            class="shrink-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-700/80 rounded-t-3xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
             <!-- Bottom Nav will be rendered here by JavaScript -->
         </nav>
     </div>
@@ -254,7 +285,7 @@
                     uid: user.uid
                 });
 
-                document.getElementById('register-success').innerHTML = 
+                document.getElementById('register-success').innerHTML =
                     'Pendaftaran berhasil! Akun Anda akan disetujui oleh admin terlebih dahulu.';
                 showElement('register-success');
 
@@ -618,39 +649,34 @@
 
             // === Hijri Date Converter (Algoritma yang Lebih Akurat) ===
             const toHijri = (gregorianDate) => {
+                // Algoritma yang lebih akurat (Kuwaiti algorithm)
                 const int = (n) => Math.floor(n);
-                const day = gregorianDate.getDate();
-                const month = gregorianDate.getMonth() + 1; // JavaScript months are 0-based
-                const year = gregorianDate.getFullYear();
+                let d = gregorianDate.getDate();
+                let m = gregorianDate.getMonth() + 1;
+                let y = gregorianDate.getFullYear();
 
-                // Konversi ke Julian Day Number
-                let a = int((14 - month) / 12);
-                let y = year - a;
-                let m = month + 12 * a - 3;
-                let jd = day + int((153 * m + 2) / 5) + 365 * y + int(y / 4) - int(y / 100) + int(y / 400) + 1721119;
+                // Konversi Gregorian ke Julian Day
+                let jd = int((1461 * (y + 4800 + int((m - 14) / 12))) / 4) +
+                    int((367 * (m - 2 - 12 * (int((m - 14) / 12)))) / 12) -
+                    int((3 * (int((y + 4900 + int((m - 14) / 12)) / 100))) / 4) +
+                    d - 32075;
 
-                // Konversi dari Julian Day ke Hijri (dengan koreksi untuk akurasi modern)
-                let hijriJd = jd - 1948084; // Epoch Hijri yang disesuaikan
-                let hYear = int((hijriJd * 30) / 10631) + 1;
-                let remainingDays = hijriJd - int(((hYear - 1) * 10631) / 30);
+                // Konversi Julian Day ke Hijriah
+                let l = jd - 1948440 + 10632;
+                let n = int((l - 1) / 10631);
+                l = l - 10631 * n + 354;
+                let j = (int((10985 - l) / 5316)) * (int((50 * l) / 17719)) +
+                    (int(l / 5670)) * (int((43 * l) / 15238));
+                l = l - (int((30 - j) / 15)) * (int((17719 * j) / 50)) -
+                    (int(j / 16)) * (int((15238 * j) / 43)) + 29;
 
-                // Hitung bulan dan hari
-                let hMonth = 1;
-                const monthDays = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
-
-                while (remainingDays > monthDays[hMonth - 1]) {
-                    remainingDays -= monthDays[hMonth - 1];
-                    hMonth++;
-                    if (hMonth > 12) {
-                        hMonth = 1;
-                        hYear++;
-                    }
-                }
-
-                let hDay = Math.max(1, remainingDays);
+                let hMonth = int((24 * l) / 709);
+                let hDay = l - int((709 * hMonth) / 24);
+                let hYear = 30 * n + j - 30;
 
                 const monthNames = ["Muharram", "Safar", "Rabi'ul Awwal", "Rabi'ul Akhir", "Jumadal Ula", "Jumadal Akhirah", "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dzulqaidah", "Dzulhijjah"];
-                return { day: hDay, month: hMonth, monthName: monthNames[hMonth - 1], year: hYear };
+
+                return {day: hDay, month: hMonth, monthName: monthNames[hMonth - 1], year: hYear};
             };
 
             // === Sistem Prediksi Menstruasi ===
@@ -677,7 +703,7 @@
                 if (sortedDates.length >= 2) {
                     const cycles = [];
                     for (let i = 1; i < Math.min(4, sortedDates.length); i++) {
-                        const cycle = Math.round((sortedDates[i] - sortedDates[i-1]) / (1000 * 60 * 60 * 24));
+                        const cycle = Math.round((sortedDates[i] - sortedDates[i - 1]) / (1000 * 60 * 60 * 24));
                         if (cycle >= 21 && cycle <= 35) cycles.push(cycle);
                     }
                     if (cycles.length > 0) {
@@ -700,7 +726,7 @@
                 fertileStart.setDate(fertileStart.getDate() - 5);
                 const fertileEnd = new Date(ovulationDate);
                 fertileEnd.setDate(fertileEnd.getDate() + 1);
-                predictions.fertileWindow = { start: fertileStart, end: fertileEnd };
+                predictions.fertileWindow = {start: fertileStart, end: fertileEnd};
 
                 // Periksa ishadhah (haid lebih dari 15 hari berturut-turut)
                 const today = new Date();
@@ -844,146 +870,146 @@
             // === Database Kota Indonesia ===
             const INDONESIA_CITIES = [
                 // Pulau Jawa
-                { name: 'Jakarta', lat: -6.2088, lon: 106.8456, province: 'DKI Jakarta' },
-                { name: 'Surabaya', lat: -7.2575, lon: 112.7521, province: 'Jawa Timur' },
-                { name: 'Bandung', lat: -6.9175, lon: 107.6191, province: 'Jawa Barat' },
-                { name: 'Bekasi', lat: -6.2383, lon: 106.9756, province: 'Jawa Barat' },
-                { name: 'Medan', lat: 3.5952, lon: 98.6722, province: 'Sumatera Utara' },
-                { name: 'Tangerang', lat: -6.1783, lon: 106.6319, province: 'Banten' },
-                { name: 'Depok', lat: -6.4025, lon: 106.7942, province: 'Jawa Barat' },
-                { name: 'Semarang', lat: -6.9667, lon: 110.4167, province: 'Jawa Tengah' },
-                { name: 'Palembang', lat: -2.9761, lon: 104.7754, province: 'Sumatera Selatan' },
-                { name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan' },
-                { name: 'South Tangerang', lat: -6.2878, lon: 106.7306, province: 'Banten' },
-                { name: 'Batam', lat: 1.0456, lon: 104.0305, province: 'Kepulauan Riau' },
-                { name: 'Bogor', lat: -6.5950, lon: 106.8167, province: 'Jawa Barat' },
-                { name: 'Pekanbaru', lat: 0.5333, lon: 101.4500, province: 'Riau' },
-                { name: 'Bandar Lampung', lat: -5.4292, lon: 105.2610, province: 'Lampung' },
-                
+                {name: 'Jakarta', lat: -6.2088, lon: 106.8456, province: 'DKI Jakarta'},
+                {name: 'Surabaya', lat: -7.2575, lon: 112.7521, province: 'Jawa Timur'},
+                {name: 'Bandung', lat: -6.9175, lon: 107.6191, province: 'Jawa Barat'},
+                {name: 'Bekasi', lat: -6.2383, lon: 106.9756, province: 'Jawa Barat'},
+                {name: 'Medan', lat: 3.5952, lon: 98.6722, province: 'Sumatera Utara'},
+                {name: 'Tangerang', lat: -6.1783, lon: 106.6319, province: 'Banten'},
+                {name: 'Depok', lat: -6.4025, lon: 106.7942, province: 'Jawa Barat'},
+                {name: 'Semarang', lat: -6.9667, lon: 110.4167, province: 'Jawa Tengah'},
+                {name: 'Palembang', lat: -2.9761, lon: 104.7754, province: 'Sumatera Selatan'},
+                {name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan'},
+                {name: 'South Tangerang', lat: -6.2878, lon: 106.7306, province: 'Banten'},
+                {name: 'Batam', lat: 1.0456, lon: 104.0305, province: 'Kepulauan Riau'},
+                {name: 'Bogor', lat: -6.5950, lon: 106.8167, province: 'Jawa Barat'},
+                {name: 'Pekanbaru', lat: 0.5333, lon: 101.4500, province: 'Riau'},
+                {name: 'Bandar Lampung', lat: -5.4292, lon: 105.2610, province: 'Lampung'},
+
                 // Sumatera
-                { name: 'Padang', lat: -0.9492, lon: 100.3543, province: 'Sumatera Barat' },
-                { name: 'Malang', lat: -7.9797, lon: 112.6304, province: 'Jawa Timur' },
-                { name: 'Samarinda', lat: -0.5018, lon: 117.1536, province: 'Kalimantan Timur' },
-                { name: 'Tasikmalaya', lat: -7.3506, lon: 108.2170, province: 'Jawa Barat' },
-                { name: 'Banjarmasin', lat: -3.3194, lon: 114.5901, province: 'Kalimantan Selatan' },
-                { name: 'Pontianak', lat: -0.0263, lon: 109.3425, province: 'Kalimantan Barat' },
-                { name: 'Cimahi', lat: -6.8722, lon: 107.5423, province: 'Jawa Barat' },
-                { name: 'Denpasar', lat: -8.6500, lon: 115.2167, province: 'Bali' },
-                { name: 'Balikpapan', lat: -1.2379, lon: 116.8529, province: 'Kalimantan Timur' },
-                { name: 'Jambi', lat: -1.6101, lon: 103.6131, province: 'Jambi' },
-                { name: 'Surakarta', lat: -7.5667, lon: 110.8333, province: 'Jawa Tengah' },
-                { name: 'Yogyakarta', lat: -7.7956, lon: 110.3695, province: 'DI Yogyakarta' },
-                { name: 'Kupang', lat: -10.1772, lon: 123.6070, province: 'Nusa Tenggara Timur' },
-                { name: 'Cirebon', lat: -6.7063, lon: 108.5570, province: 'Jawa Barat' },
-                { name: 'Serang', lat: -6.1169, lon: 106.1539, province: 'Banten' },
-                { name: 'Mataram', lat: -8.5833, lon: 116.1167, province: 'Nusa Tenggara Barat' },
-                
+                {name: 'Padang', lat: -0.9492, lon: 100.3543, province: 'Sumatera Barat'},
+                {name: 'Malang', lat: -7.9797, lon: 112.6304, province: 'Jawa Timur'},
+                {name: 'Samarinda', lat: -0.5018, lon: 117.1536, province: 'Kalimantan Timur'},
+                {name: 'Tasikmalaya', lat: -7.3506, lon: 108.2170, province: 'Jawa Barat'},
+                {name: 'Banjarmasin', lat: -3.3194, lon: 114.5901, province: 'Kalimantan Selatan'},
+                {name: 'Pontianak', lat: -0.0263, lon: 109.3425, province: 'Kalimantan Barat'},
+                {name: 'Cimahi', lat: -6.8722, lon: 107.5423, province: 'Jawa Barat'},
+                {name: 'Denpasar', lat: -8.6500, lon: 115.2167, province: 'Bali'},
+                {name: 'Balikpapan', lat: -1.2379, lon: 116.8529, province: 'Kalimantan Timur'},
+                {name: 'Jambi', lat: -1.6101, lon: 103.6131, province: 'Jambi'},
+                {name: 'Surakarta', lat: -7.5667, lon: 110.8333, province: 'Jawa Tengah'},
+                {name: 'Yogyakarta', lat: -7.7956, lon: 110.3695, province: 'DI Yogyakarta'},
+                {name: 'Kupang', lat: -10.1772, lon: 123.6070, province: 'Nusa Tenggara Timur'},
+                {name: 'Cirebon', lat: -6.7063, lon: 108.5570, province: 'Jawa Barat'},
+                {name: 'Serang', lat: -6.1169, lon: 106.1539, province: 'Banten'},
+                {name: 'Mataram', lat: -8.5833, lon: 116.1167, province: 'Nusa Tenggara Barat'},
+
                 // Kalimantan
-                { name: 'Palangka Raya', lat: -2.2136, lon: 113.9230, province: 'Kalimantan Tengah' },
-                { name: 'Manado', lat: 1.4748, lon: 124.8421, province: 'Sulawesi Utara' },
-                { name: 'Ambon', lat: -3.6954, lon: 128.1814, province: 'Maluku' },
-                { name: 'Jayapura', lat: -2.5489, lon: 140.7000, province: 'Papua' },
-                { name: 'Kendari', lat: -3.9450, lon: 122.4989, province: 'Sulawesi Tenggara' },
-                { name: 'Palu', lat: -0.8917, lon: 119.8707, province: 'Sulawesi Tengah' },
-                { name: 'Gorontalo', lat: 0.5435, lon: 123.0682, province: 'Gorontalo' },
-                { name: 'Mamuju', lat: -2.6797, lon: 118.8878, province: 'Sulawesi Barat' },
-                { name: 'Ternate', lat: 0.7886, lon: 127.3784, province: 'Maluku Utara' },
-                { name: 'Bengkulu', lat: -3.8004, lon: 102.2655, province: 'Bengkulu' },
-                { name: 'Banda Aceh', lat: 5.5483, lon: 95.3238, province: 'Aceh' },
-                
+                {name: 'Palangka Raya', lat: -2.2136, lon: 113.9230, province: 'Kalimantan Tengah'},
+                {name: 'Manado', lat: 1.4748, lon: 124.8421, province: 'Sulawesi Utara'},
+                {name: 'Ambon', lat: -3.6954, lon: 128.1814, province: 'Maluku'},
+                {name: 'Jayapura', lat: -2.5489, lon: 140.7000, province: 'Papua'},
+                {name: 'Kendari', lat: -3.9450, lon: 122.4989, province: 'Sulawesi Tenggara'},
+                {name: 'Palu', lat: -0.8917, lon: 119.8707, province: 'Sulawesi Tengah'},
+                {name: 'Gorontalo', lat: 0.5435, lon: 123.0682, province: 'Gorontalo'},
+                {name: 'Mamuju', lat: -2.6797, lon: 118.8878, province: 'Sulawesi Barat'},
+                {name: 'Ternate', lat: 0.7886, lon: 127.3784, province: 'Maluku Utara'},
+                {name: 'Bengkulu', lat: -3.8004, lon: 102.2655, province: 'Bengkulu'},
+                {name: 'Banda Aceh', lat: 5.5483, lon: 95.3238, province: 'Aceh'},
+
                 // Kota-kota Besar Lainnya
-                { name: 'Cilegon', lat: -6.0022, lon: 106.0194, province: 'Banten' },
-                { name: 'Sukabumi', lat: -6.9278, lon: 106.9319, province: 'Jawa Barat' },
-                { name: 'Cirebon', lat: -6.7325, lon: 108.5570, province: 'Jawa Barat' },
-                { name: 'Purwokerto', lat: -7.4217, lon: 109.2339, province: 'Jawa Tengah' },
-                { name: 'Magelang', lat: -7.4700, lon: 110.2167, province: 'Jawa Tengah' },
-                { name: 'Tegal', lat: -6.8694, lon: 109.1403, province: 'Jawa Tengah' },
-                { name: 'Pekalongan', lat: -6.8886, lon: 109.6753, province: 'Jawa Tengah' },
-                { name: 'Kediri', lat: -7.8167, lon: 112.0167, province: 'Jawa Timur' },
-                { name: 'Blitar', lat: -8.0983, lon: 112.1681, province: 'Jawa Timur' },
-                { name: 'Mojokerto', lat: -7.4667, lon: 112.4333, province: 'Jawa Timur' },
-                { name: 'Madiun', lat: -7.6297, lon: 111.5239, province: 'Jawa Timur' },
-                { name: 'Jember', lat: -8.1667, lon: 113.7000, province: 'Jawa Timur' },
-                { name: 'Banyuwangi', lat: -8.2192, lon: 114.3689, province: 'Jawa Timur' },
-                { name: 'Probolinggo', lat: -7.7542, lon: 113.2156, province: 'Jawa Timur' },
-                
+                {name: 'Cilegon', lat: -6.0022, lon: 106.0194, province: 'Banten'},
+                {name: 'Sukabumi', lat: -6.9278, lon: 106.9319, province: 'Jawa Barat'},
+                {name: 'Cirebon', lat: -6.7325, lon: 108.5570, province: 'Jawa Barat'},
+                {name: 'Purwokerto', lat: -7.4217, lon: 109.2339, province: 'Jawa Tengah'},
+                {name: 'Magelang', lat: -7.4700, lon: 110.2167, province: 'Jawa Tengah'},
+                {name: 'Tegal', lat: -6.8694, lon: 109.1403, province: 'Jawa Tengah'},
+                {name: 'Pekalongan', lat: -6.8886, lon: 109.6753, province: 'Jawa Tengah'},
+                {name: 'Kediri', lat: -7.8167, lon: 112.0167, province: 'Jawa Timur'},
+                {name: 'Blitar', lat: -8.0983, lon: 112.1681, province: 'Jawa Timur'},
+                {name: 'Mojokerto', lat: -7.4667, lon: 112.4333, province: 'Jawa Timur'},
+                {name: 'Madiun', lat: -7.6297, lon: 111.5239, province: 'Jawa Timur'},
+                {name: 'Jember', lat: -8.1667, lon: 113.7000, province: 'Jawa Timur'},
+                {name: 'Banyuwangi', lat: -8.2192, lon: 114.3689, province: 'Jawa Timur'},
+                {name: 'Probolinggo', lat: -7.7542, lon: 113.2156, province: 'Jawa Timur'},
+
                 // Sumatera Lengkap
-                { name: 'Binjai', lat: 3.6000, lon: 98.4833, province: 'Sumatera Utara' },
-                { name: 'Pematangsiantar', lat: 2.9667, lon: 99.0667, province: 'Sumatera Utara' },
-                { name: 'Tebing Tinggi', lat: 3.3333, lon: 99.1667, province: 'Sumatera Utara' },
-                { name: 'Dumai', lat: 1.6667, lon: 101.4500, province: 'Riau' },
-                { name: 'Bukittinggi', lat: -0.3000, lon: 100.3700, province: 'Sumatera Barat' },
-                { name: 'Solok', lat: -0.7917, lon: 100.6583, province: 'Sumatera Barat' },
-                { name: 'Payakumbuh', lat: -0.2167, lon: 100.6333, province: 'Sumatera Barat' },
-                { name: 'Lubuklinggau', lat: -3.3000, lon: 102.8667, province: 'Sumatera Selatan' },
-                { name: 'Prabumulih', lat: -3.4333, lon: 104.2333, province: 'Sumatera Selatan' },
-                { name: 'Metro', lat: -5.1139, lon: 105.3067, province: 'Lampung' },
-                
+                {name: 'Binjai', lat: 3.6000, lon: 98.4833, province: 'Sumatera Utara'},
+                {name: 'Pematangsiantar', lat: 2.9667, lon: 99.0667, province: 'Sumatera Utara'},
+                {name: 'Tebing Tinggi', lat: 3.3333, lon: 99.1667, province: 'Sumatera Utara'},
+                {name: 'Dumai', lat: 1.6667, lon: 101.4500, province: 'Riau'},
+                {name: 'Bukittinggi', lat: -0.3000, lon: 100.3700, province: 'Sumatera Barat'},
+                {name: 'Solok', lat: -0.7917, lon: 100.6583, province: 'Sumatera Barat'},
+                {name: 'Payakumbuh', lat: -0.2167, lon: 100.6333, province: 'Sumatera Barat'},
+                {name: 'Lubuklinggau', lat: -3.3000, lon: 102.8667, province: 'Sumatera Selatan'},
+                {name: 'Prabumulih', lat: -3.4333, lon: 104.2333, province: 'Sumatera Selatan'},
+                {name: 'Metro', lat: -5.1139, lon: 105.3067, province: 'Lampung'},
+
                 // Kalimantan Lengkap
-                { name: 'Tarakan', lat: 3.3000, lon: 117.6333, province: 'Kalimantan Utara' },
-                { name: 'Bontang', lat: 0.1333, lon: 117.5000, province: 'Kalimantan Timur' },
-                { name: 'Singkawang', lat: 0.9000, lon: 108.9833, province: 'Kalimantan Barat' },
-                
+                {name: 'Tarakan', lat: 3.3000, lon: 117.6333, province: 'Kalimantan Utara'},
+                {name: 'Bontang', lat: 0.1333, lon: 117.5000, province: 'Kalimantan Timur'},
+                {name: 'Singkawang', lat: 0.9000, lon: 108.9833, province: 'Kalimantan Barat'},
+
                 // Sulawesi
-                { name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan' },
-                { name: 'Pare-Pare', lat: -4.0167, lon: 119.6333, province: 'Sulawesi Selatan' },
-                { name: 'Palopo', lat: -2.9833, lon: 120.2000, province: 'Sulawesi Selatan' },
-                { name: 'Bitung', lat: 1.4500, lon: 125.1833, province: 'Sulawesi Utara' },
-                { name: 'Tomohon', lat: 1.3333, lon: 124.8333, province: 'Sulawesi Utara' },
-                { name: 'Kotamobagu', lat: 0.7333, lon: 124.3167, province: 'Sulawesi Utara' },
-                { name: 'Bau-Bau', lat: -5.4833, lon: 122.6000, province: 'Sulawesi Tenggara' },
-                
+                {name: 'Makassar', lat: -5.1477, lon: 119.4327, province: 'Sulawesi Selatan'},
+                {name: 'Pare-Pare', lat: -4.0167, lon: 119.6333, province: 'Sulawesi Selatan'},
+                {name: 'Palopo', lat: -2.9833, lon: 120.2000, province: 'Sulawesi Selatan'},
+                {name: 'Bitung', lat: 1.4500, lon: 125.1833, province: 'Sulawesi Utara'},
+                {name: 'Tomohon', lat: 1.3333, lon: 124.8333, province: 'Sulawesi Utara'},
+                {name: 'Kotamobagu', lat: 0.7333, lon: 124.3167, province: 'Sulawesi Utara'},
+                {name: 'Bau-Bau', lat: -5.4833, lon: 122.6000, province: 'Sulawesi Tenggara'},
+
                 // Nusa Tenggara & Maluku
-                { name: 'Singaraja', lat: -8.1167, lon: 115.0833, province: 'Bali' },
-                { name: 'Bima', lat: -8.4667, lon: 118.7167, province: 'Nusa Tenggara Barat' },
-                { name: 'Ende', lat: -8.8500, lon: 121.6667, province: 'Nusa Tenggara Timur' },
-                { name: 'Maumere', lat: -8.6167, lon: 122.2167, province: 'Nusa Tenggara Timur' },
-                { name: 'Tual', lat: -5.6333, lon: 132.7500, province: 'Maluku' },
-                { name: 'Tidore', lat: 0.6833, lon: 127.4000, province: 'Maluku Utara' },
-                
+                {name: 'Singaraja', lat: -8.1167, lon: 115.0833, province: 'Bali'},
+                {name: 'Bima', lat: -8.4667, lon: 118.7167, province: 'Nusa Tenggara Barat'},
+                {name: 'Ende', lat: -8.8500, lon: 121.6667, province: 'Nusa Tenggara Timur'},
+                {name: 'Maumere', lat: -8.6167, lon: 122.2167, province: 'Nusa Tenggara Timur'},
+                {name: 'Tual', lat: -5.6333, lon: 132.7500, province: 'Maluku'},
+                {name: 'Tidore', lat: 0.6833, lon: 127.4000, province: 'Maluku Utara'},
+
                 // Papua
-                { name: 'Sorong', lat: -0.8667, lon: 131.2500, province: 'Papua Barat' },
-                { name: 'Merauke', lat: -8.4833, lon: 140.4000, province: 'Papua' },
-                { name: 'Nabire', lat: -3.3667, lon: 135.5000, province: 'Papua' },
-                { name: 'Timika', lat: -4.5333, lon: 136.8833, province: 'Papua' },
-                { name: 'Biak', lat: -1.1833, lon: 136.0833, province: 'Papua' },
-                { name: 'Wamena', lat: -4.1000, lon: 138.9500, province: 'Papua' },
-                
+                {name: 'Sorong', lat: -0.8667, lon: 131.2500, province: 'Papua Barat'},
+                {name: 'Merauke', lat: -8.4833, lon: 140.4000, province: 'Papua'},
+                {name: 'Nabire', lat: -3.3667, lon: 135.5000, province: 'Papua'},
+                {name: 'Timika', lat: -4.5333, lon: 136.8833, province: 'Papua'},
+                {name: 'Biak', lat: -1.1833, lon: 136.0833, province: 'Papua'},
+                {name: 'Wamena', lat: -4.1000, lon: 138.9500, province: 'Papua'},
+
                 // Kota-kota Tambahan
-                { name: 'Indramayu', lat: -6.3264, lon: 108.3200, province: 'Jawa Barat' },
-                { name: 'Garut', lat: -7.2125, lon: 107.9000, province: 'Jawa Barat' },
-                { name: 'Banjar', lat: -7.3667, lon: 108.5333, province: 'Jawa Barat' },
-                { name: 'Subang', lat: -6.5667, lon: 107.7500, province: 'Jawa Barat' },
-                { name: 'Purwakarta', lat: -6.5500, lon: 107.4333, province: 'Jawa Barat' },
-                { name: 'Karawang', lat: -6.3000, lon: 107.3000, province: 'Jawa Barat' },
-                { name: 'Cianjur', lat: -6.8167, lon: 107.1333, province: 'Jawa Barat' },
-                { name: 'Kuningan', lat: -6.9833, lon: 108.4833, province: 'Jawa Barat' },
-                { name: 'Wonogiri', lat: -7.8167, lon: 110.9167, province: 'Jawa Tengah' },
-                { name: 'Klaten', lat: -7.7056, lon: 110.6056, province: 'Jawa Tengah' },
-                { name: 'Boyolali', lat: -7.5333, lon: 110.5833, province: 'Jawa Tengah' },
-                { name: 'Sukoharjo', lat: -7.6833, lon: 110.8333, province: 'Jawa Tengah' },
-                { name: 'Karanganyar', lat: -7.6000, lon: 111.0333, province: 'Jawa Tengah' },
-                { name: 'Sragen', lat: -7.4167, lon: 111.0000, province: 'Jawa Tengah' },
-                { name: 'Gresik', lat: -7.1556, lon: 112.6536, province: 'Jawa Timur' },
-                { name: 'Sidoarjo', lat: -7.4486, lon: 112.7181, province: 'Jawa Timur' },
-                { name: 'Pasuruan', lat: -7.6453, lon: 112.9075, province: 'Jawa Timur' },
-                { name: 'Lumajang', lat: -8.1333, lon: 113.2167, province: 'Jawa Timur' },
-                { name: 'Bondowoso', lat: -7.9167, lon: 113.8167, province: 'Jawa Timur' },
-                { name: 'Situbondo', lat: -7.7056, lon: 114.0097, province: 'Jawa Timur' },
-                { name: 'Ngawi', lat: -7.4042, lon: 111.4464, province: 'Jawa Timur' },
-                { name: 'Magetan', lat: -7.6167, lon: 111.3500, province: 'Jawa Timur' },
-                { name: 'Pacitan', lat: -8.2000, lon: 111.0833, province: 'Jawa Timur' },
-                { name: 'Ponorogo', lat: -7.8667, lon: 111.4667, province: 'Jawa Timur' },
-                { name: 'Trenggalek', lat: -8.0500, lon: 111.7167, province: 'Jawa Timur' },
-                { name: 'Tulungagung', lat: -8.0667, lon: 111.9000, province: 'Jawa Timur' }
+                {name: 'Indramayu', lat: -6.3264, lon: 108.3200, province: 'Jawa Barat'},
+                {name: 'Garut', lat: -7.2125, lon: 107.9000, province: 'Jawa Barat'},
+                {name: 'Banjar', lat: -7.3667, lon: 108.5333, province: 'Jawa Barat'},
+                {name: 'Subang', lat: -6.5667, lon: 107.7500, province: 'Jawa Barat'},
+                {name: 'Purwakarta', lat: -6.5500, lon: 107.4333, province: 'Jawa Barat'},
+                {name: 'Karawang', lat: -6.3000, lon: 107.3000, province: 'Jawa Barat'},
+                {name: 'Cianjur', lat: -6.8167, lon: 107.1333, province: 'Jawa Barat'},
+                {name: 'Kuningan', lat: -6.9833, lon: 108.4833, province: 'Jawa Barat'},
+                {name: 'Wonogiri', lat: -7.8167, lon: 110.9167, province: 'Jawa Tengah'},
+                {name: 'Klaten', lat: -7.7056, lon: 110.6056, province: 'Jawa Tengah'},
+                {name: 'Boyolali', lat: -7.5333, lon: 110.5833, province: 'Jawa Tengah'},
+                {name: 'Sukoharjo', lat: -7.6833, lon: 110.8333, province: 'Jawa Tengah'},
+                {name: 'Karanganyar', lat: -7.6000, lon: 111.0333, province: 'Jawa Tengah'},
+                {name: 'Sragen', lat: -7.4167, lon: 111.0000, province: 'Jawa Tengah'},
+                {name: 'Gresik', lat: -7.1556, lon: 112.6536, province: 'Jawa Timur'},
+                {name: 'Sidoarjo', lat: -7.4486, lon: 112.7181, province: 'Jawa Timur'},
+                {name: 'Pasuruan', lat: -7.6453, lon: 112.9075, province: 'Jawa Timur'},
+                {name: 'Lumajang', lat: -8.1333, lon: 113.2167, province: 'Jawa Timur'},
+                {name: 'Bondowoso', lat: -7.9167, lon: 113.8167, province: 'Jawa Timur'},
+                {name: 'Situbondo', lat: -7.7056, lon: 114.0097, province: 'Jawa Timur'},
+                {name: 'Ngawi', lat: -7.4042, lon: 111.4464, province: 'Jawa Timur'},
+                {name: 'Magetan', lat: -7.6167, lon: 111.3500, province: 'Jawa Timur'},
+                {name: 'Pacitan', lat: -8.2000, lon: 111.0833, province: 'Jawa Timur'},
+                {name: 'Ponorogo', lat: -7.8667, lon: 111.4667, province: 'Jawa Timur'},
+                {name: 'Trenggalek', lat: -8.0500, lon: 111.7167, province: 'Jawa Timur'},
+                {name: 'Tulungagung', lat: -8.0667, lon: 111.9000, province: 'Jawa Timur'}
             ];
 
             // Fungsi untuk mencari kota
             const searchCity = (query) => {
                 if (!query || query.trim().length < 2) return [];
-                
+
                 const searchTerm = query.toLowerCase().trim();
-                return INDONESIA_CITIES.filter(city => 
+                return INDONESIA_CITIES.filter(city =>
                     city.name.toLowerCase().includes(searchTerm) ||
                     city.province.toLowerCase().includes(searchTerm)
                 ).slice(0, 10); // Batasi hasil maksimal 10
@@ -1000,7 +1026,7 @@
 
                     if (city.trim()) {
                         // Cari di database kota lokal terlebih dahulu
-                        const cityData = INDONESIA_CITIES.find(c => 
+                        const cityData = INDONESIA_CITIES.find(c =>
                             c.name.toLowerCase() === city.toLowerCase().trim()
                         );
 
@@ -1078,7 +1104,7 @@
                         state.prayerTimes.data = {
                             timings: {
                                 Fajr: "04:30",
-                                Dhuhr: "12:00", 
+                                Dhuhr: "12:00",
                                 Asr: "15:15",
                                 Maghrib: "18:00",
                                 Isha: "19:15"
@@ -1087,7 +1113,7 @@
                                 readable: new Date().toLocaleDateString('id-ID'),
                                 hijri: {
                                     date: toHijri(new Date()).day,
-                                    month: { en: toHijri(new Date()).monthName },
+                                    month: {en: toHijri(new Date()).monthName},
                                     year: toHijri(new Date()).year
                                 }
                             }
@@ -1122,11 +1148,11 @@
                 };
 
                 const prayers = [
-                    { name: 'Subuh', time: cleanTime(timings.Fajr), arabic: 'الفجر' },
-                    { name: 'Dzuhur', time: cleanTime(timings.Dhuhr), arabic: 'الظهر' },
-                    { name: 'Ashar', time: cleanTime(timings.Asr), arabic: 'العصر' },
-                    { name: 'Maghrib', time: cleanTime(timings.Maghrib), arabic: 'المغرب' },
-                    { name: 'Isya', time: cleanTime(timings.Isha), arabic: 'العشاء' }
+                    {name: 'Subuh', time: cleanTime(timings.Fajr), arabic: 'الفجر'},
+                    {name: 'Dzuhur', time: cleanTime(timings.Dhuhr), arabic: 'الظهر'},
+                    {name: 'Ashar', time: cleanTime(timings.Asr), arabic: 'العصر'},
+                    {name: 'Maghrib', time: cleanTime(timings.Maghrib), arabic: 'المغرب'},
+                    {name: 'Isya', time: cleanTime(timings.Isha), arabic: 'العشاء'}
                 ];
 
                 for (let prayer of prayers) {
@@ -1142,11 +1168,11 @@
 
                 // Jika sudah lewat Isya, sholat berikutnya adalah Subuh esok hari
                 const [fajrHours, fajrMinutes] = prayers[0].time.split(':');
-                state.prayerTimes.nextPrayer = { 
-                    name: 'Subuh', 
-                    time: prayers[0].time, 
-                    arabic: 'الفجر', 
-                    isNextDay: true 
+                state.prayerTimes.nextPrayer = {
+                    name: 'Subuh',
+                    time: prayers[0].time,
+                    arabic: 'الفجر',
+                    isNextDay: true
                 };
             };
 
@@ -1268,7 +1294,7 @@
                         location: state.prayerTimes.location,
                         lastUpdated: state.prayerTimes.lastUpdated
                     }));
-                } catch (e) { console.error("Failed to save data:", e); }
+                } catch (e) {console.error("Failed to save data:", e);}
             };
 
             const loadData = () => {
@@ -1315,7 +1341,7 @@
                             calculateNextPrayer();
                         }
                     }
-                } catch (e) { console.error("Failed to load data:", e); }
+                } catch (e) {console.error("Failed to load data:", e);}
             };
 
             // === Chat History Management ===
@@ -1378,7 +1404,7 @@
                 </header>`;
 
             const renderCalendarScreen = () => {
-                const { currentDate, userData } = state;
+                const {currentDate, userData} = state;
                 const today = new Date();
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
@@ -1406,18 +1432,18 @@
                     const isMenstruationEnd = userData.menstruationEndDates.includes(dateString);
 
                     // Periksa apakah tanggal ini adalah prediksi haid berikutnya
-                    const isNextPeriodPrediction = predictions.nextPeriod && 
+                    const isNextPeriodPrediction = predictions.nextPeriod &&
                         dateObj.getFullYear() === predictions.nextPeriod.getFullYear() &&
                         dateObj.getMonth() === predictions.nextPeriod.getMonth() &&
                         dateObj.getDate() === predictions.nextPeriod.getDate();
 
                     // Periksa apakah tanggal ini dalam masa subur
-                    const isFertileWindow = predictions.fertileWindow && 
-                        dateObj.getTime() >= predictions.fertileWindow.start.getTime() && 
+                    const isFertileWindow = predictions.fertileWindow &&
+                        dateObj.getTime() >= predictions.fertileWindow.start.getTime() &&
                         dateObj.getTime() <= predictions.fertileWindow.end.getTime();
 
                     // Periksa apakah tanggal ini adalah ovulasi
-                    const isOvulation = predictions.ovulation && 
+                    const isOvulation = predictions.ovulation &&
                         dateObj.getFullYear() === predictions.ovulation.getFullYear() &&
                         dateObj.getMonth() === predictions.ovulation.getMonth() &&
                         dateObj.getDate() === predictions.ovulation.getDate();
@@ -1542,7 +1568,7 @@
                             <div class="flex justify-between items-center mb-4">
                                 <button id="prev-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700" title="Bulan Sebelumnya">${icons.ChevronLeft("text-slate-600 dark:text-slate-300")}</button>
                                 <div>
-                                    <p class="font-bold text-lg text-slate-800 dark:text-white text-center">${currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}</p>
+                                    <p class="font-bold text-lg text-slate-800 dark:text-white text-center">${currentDate.toLocaleString('id-ID', {month: 'long', year: 'numeric'})}</p>
                                     <p class="text-sm text-slate-500 dark:text-slate-400 text-center">${toHijri(currentDate).monthName} ${toHijri(currentDate).year} H</p>
                                 </div>
                                 <button id="next-month-btn" class="p-2 rounded-full hover:bg-rose-100 dark:hover:bg-slate-700" title="Bulan Berikutnya">${icons.ChevronRight("text-slate-600 dark:text-slate-300")}</button>
@@ -1574,7 +1600,7 @@
 
 
             const renderTapClipzScreen = () => {
-                const { tapClipz } = state;
+                const {tapClipz} = state;
                 const currentVideo = tapClipz.videos[tapClipz.currentVideoIndex];
 
                 if (tapClipz.isVideoLoading) {
@@ -1607,7 +1633,7 @@
             };
 
             const renderKuizScreen = () => {
-                const { kuiz } = state;
+                const {kuiz} = state;
 
                 if (kuiz.isLoading) {
                     return `
@@ -1640,12 +1666,12 @@
                             <!-- Hasil Jawaban -->
                             <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg">
                                 <div class="text-center mb-6">
-                                    ${isCorrect ? 
-                                        `${icons.CheckCircle("mx-auto h-16 w-16 text-green-500 mb-4")}
+                                    ${isCorrect ?
+                            `${icons.CheckCircle("mx-auto h-16 w-16 text-green-500 mb-4")}
                                          <h2 class="text-2xl font-bold text-green-600 dark:text-green-400">Jawaban Benar!</h2>` :
-                                        `${icons.XCircle("mx-auto h-16 w-16 text-red-500 mb-4")}
+                            `${icons.XCircle("mx-auto h-16 w-16 text-red-500 mb-4")}
                                          <h2 class="text-2xl font-bold text-red-600 dark:text-red-400">Jawaban Salah</h2>`
-                                    }
+                        }
                                 </div>
 
                                 <!-- Pertanyaan -->
@@ -1699,10 +1725,10 @@
                                     <div class="space-y-2 max-h-40 overflow-y-auto">
                                         ${kuiz.history.slice(0, 3).map(item => `
                                             <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                                                ${item.isCorrect ? 
-                                                    icons.CheckCircle("w-5 h-5 text-green-500") : 
-                                                    icons.XCircle("w-5 h-5 text-red-500")
-                                                }
+                                                ${item.isCorrect ?
+                                icons.CheckCircle("w-5 h-5 text-green-500") :
+                                icons.XCircle("w-5 h-5 text-red-500")
+                            }
                                                 <div class="flex-1">
                                                     <p class="text-sm text-slate-600 dark:text-slate-300 truncate">${item.question}</p>
                                                     <p class="text-xs text-slate-400">${item.timestamp}</p>
@@ -1803,7 +1829,7 @@
                     return renderChatHistoryScreen();
                 }
 
-                const { messages, isLoading } = state.tanyaCloud;
+                const {messages, isLoading} = state.tanyaCloud;
                 let messagesHtml = messages.map(msg => `
                     <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
                         <div class="max-w-xs md:max-w-md lg:max-w-lg px-4 py-3 shadow-md ${msg.role === 'user' ? 'bg-emerald-100 dark:bg-emerald-800 text-slate-800 dark:text-slate-100 rounded-t-2xl rounded-bl-2xl' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-t-2xl rounded-br-2xl'}">
@@ -1887,7 +1913,7 @@
             };
 
             const renderChatHistoryScreen = () => {
-                const { chatHistory } = state.tanyaCloud;
+                const {chatHistory} = state.tanyaCloud;
 
                 let historyHtml = '';
                 if (chatHistory.length === 0) {
@@ -1903,14 +1929,14 @@
                             <div class="flex justify-between items-start pointer-events-none">
                                 <div class="flex-grow">
                                     <h3 class="font-semibold text-slate-800 dark:text-white text-sm">${chat.title}</h3>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${new Date(chat.timestamp).toLocaleDateString('id-ID', { 
-                                        weekday: 'short', 
-                                        year: 'numeric', 
-                                        month: 'short', 
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${new Date(chat.timestamp).toLocaleDateString('id-ID', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}</p>
                                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${chat.messages.length} pesan</p>
                                 </div>
                                 <button class="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-all pointer-events-auto delete-chat-btn" data-chat-id="${chat.id}" title="Hapus Chat">
@@ -1948,7 +1974,7 @@
             };
 
             const renderSettingsScreen = () => {
-                const { prayerTimes } = state;
+                const {prayerTimes} = state;
 
                 let prayerTimesContent = '';
 
@@ -1979,11 +2005,11 @@
                     };
 
                     const prayers = [
-                        { name: 'Subuh', time: cleanTime(timings.Fajr), arabic: 'الفجر' },
-                        { name: 'Dzuhur', time: cleanTime(timings.Dhuhr), arabic: 'الظهر' },
-                        { name: 'Ashar', time: cleanTime(timings.Asr), arabic: 'العصر' },
-                        { name: 'Maghrib', time: cleanTime(timings.Maghrib), arabic: 'المغرب' },
-                        { name: 'Isya', time: cleanTime(timings.Isha), arabic: 'العشاء' }
+                        {name: 'Subuh', time: cleanTime(timings.Fajr), arabic: 'الفجر'},
+                        {name: 'Dzuhur', time: cleanTime(timings.Dhuhr), arabic: 'الظهر'},
+                        {name: 'Ashar', time: cleanTime(timings.Asr), arabic: 'العصر'},
+                        {name: 'Maghrib', time: cleanTime(timings.Maghrib), arabic: 'المغرب'},
+                        {name: 'Isya', time: cleanTime(timings.Isha), arabic: 'العشاء'}
                     ];
 
                     updateCountdown();
@@ -2040,10 +2066,10 @@
 
                             <!-- Date Info -->
                             <div class="text-center text-xs text-slate-400 dark:text-slate-500 pt-2">
-                                ${prayerTimes.data.date ? 
-                                    `${prayerTimes.data.date.readable || new Date().toLocaleDateString('id-ID')} | ${prayerTimes.data.date.hijri ? `${prayerTimes.data.date.hijri.date} ${prayerTimes.data.date.hijri.month.en} ${prayerTimes.data.date.hijri.year}` : `${toHijri(new Date()).day} ${toHijri(new Date()).monthName} ${toHijri(new Date()).year} H`}` : 
-                                    `${new Date().toLocaleDateString('id-ID')} | ${toHijri(new Date()).day} ${toHijri(new Date()).monthName} ${toHijri(new Date()).year} H`
-                                }
+                                ${prayerTimes.data.date ?
+                            `${prayerTimes.data.date.readable || new Date().toLocaleDateString('id-ID')} | ${prayerTimes.data.date.hijri ? `${prayerTimes.data.date.hijri.date} ${prayerTimes.data.date.hijri.month.en} ${prayerTimes.data.date.hijri.year}` : `${toHijri(new Date()).day} ${toHijri(new Date()).monthName} ${toHijri(new Date()).year} H`}` :
+                            `${new Date().toLocaleDateString('id-ID')} | ${toHijri(new Date()).day} ${toHijri(new Date()).monthName} ${toHijri(new Date()).year} H`
+                        }
                             </div>
                         </div>
                     `;
@@ -2131,11 +2157,11 @@
 
             const renderBottomNav = () => {
                 const navItems = [
-                    { id: 'tap-clipz', label: 'Tap Clipz', icon: icons.Play },
-                    { id: 'kuiz', label: 'Kuiz', icon: icons.BookOpen },
-                    { id: 'calendar', label: 'Kalender', icon: icons.CalendarDays },
-                    { id: 'tanya-cloud', label: 'Tanya Cloud', icon: icons.Cloudy },
-                    { id: 'settings', label: 'Pengaturan', icon: icons.Settings },
+                    {id: 'tap-clipz', label: 'Tap Clipz', icon: icons.Play},
+                    {id: 'kuiz', label: 'Kuiz', icon: icons.BookOpen},
+                    {id: 'calendar', label: 'Kalender', icon: icons.CalendarDays},
+                    {id: 'tanya-cloud', label: 'Tanya Cloud', icon: icons.Cloudy},
+                    {id: 'settings', label: 'Pengaturan', icon: icons.Settings},
                 ];
 
                 bottomNavBarContainer.innerHTML = `
@@ -2159,9 +2185,14 @@
 
             const renderModal = () => {
                 if (state.isModalOpen && state.selectedDate) {
-                    // Perbaiki parsing tanggal untuk menghindari timezone offset
+                    // Parsing tanggal yang benar tanpa timezone offset
                     const dateParts = state.selectedDate.split('-');
-                    const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                    const year = parseInt(dateParts[0]);
+                    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed in JavaScript
+                    const day = parseInt(dateParts[2]);
+
+                    const localDate = new Date(year, month, day);
+
                     const isMarkedStart = state.userData.menstruationDates.includes(state.selectedDate);
                     const isMarkedEnd = state.userData.menstruationEndDates.includes(state.selectedDate);
 
@@ -2194,7 +2225,7 @@
                 playClickSound();
                 state.activeScreen = screen;
                 state.showChatHistory = false;
-                
+
                 // Auto-play video acak saat klik menu Tap Clipz
                 if (screen === 'tap-clipz') {
                     getRandomVideo();
@@ -2243,7 +2274,7 @@
                 // Update state userData dengan total debt yang benar
                 state.userData.fastingDebt = calculateAutomaticFastingDebt(state.userData) + state.userData.manualFastingDebt;
                 saveData();
-                
+
                 // Auto close modal setelah aksi berhasil
                 setTimeout(() => {
                     closeModal();
@@ -2265,7 +2296,7 @@
                 }
 
                 saveData();
-                
+
                 // Auto close modal setelah aksi berhasil
                 setTimeout(() => {
                     closeModal();
@@ -2308,16 +2339,16 @@
 
                 playClickSound();
 
-                state.tanyaCloud.messages.push({ role: 'user', text: prompt });
+                state.tanyaCloud.messages.push({role: 'user', text: prompt});
                 state.tanyaCloud.prompt = '';
                 state.tanyaCloud.isLoading = true;
                 state.tanyaCloud.error = null;
                 render();
 
                 if (!navigator.onLine) {
-                    state.tanyaCloud.messages.push({ 
-                        role: 'bot', 
-                        text: 'Maaf, tidak ada koneksi internet. Silakan periksa koneksi Anda dan coba lagi.' 
+                    state.tanyaCloud.messages.push({
+                        role: 'bot',
+                        text: 'Maaf, tidak ada koneksi internet. Silakan periksa koneksi Anda dan coba lagi.'
                     });
                     state.tanyaCloud.isLoading = false;
                     render();
@@ -2332,19 +2363,19 @@
                 // Map the entire conversation history to the format required by the Gemini API.
                 const contentsForAPI = state.tanyaCloud.messages.map(msg => ({
                     role: msg.role === 'bot' ? 'model' : 'user',
-                    parts: [{ text: msg.text }]
+                    parts: [{text: msg.text}]
                 }));
 
                 const payload = {
                     contents: contentsForAPI,
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    systemInstruction: {parts: [{text: systemPrompt}]},
                 };
 
                 try {
                     // Kirim request ke proxy kita
                     const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(payload)
                     });
 
@@ -2354,11 +2385,11 @@
                     const candidate = result.candidates?.[0];
                     const botMessage = candidate?.content?.parts?.[0]?.text || "Maaf, terjadi sedikit kendala. Coba beberapa saat lagi ya.";
 
-                    state.tanyaCloud.messages.push({ role: 'bot', text: botMessage });
+                    state.tanyaCloud.messages.push({role: 'bot', text: botMessage});
 
                 } catch (err) {
                     console.error("Proxy or API Error:", err);
-                    state.tanyaCloud.messages.push({ role: 'bot', text: generateLocalResponse(prompt) });
+                    state.tanyaCloud.messages.push({role: 'bot', text: generateLocalResponse(prompt)});
                 } finally {
                     state.tanyaCloud.isLoading = false;
                     render();
@@ -2454,7 +2485,7 @@
                     if (e.target.closest('#mark-start-period-btn') || e.target.id === 'mark-start-period-btn') return handleMarkStartPeriod();
                     if (e.target.closest('#mark-end-period-btn') || e.target.id === 'mark-end-period-btn') return handleMarkEndPeriod();
                     if (e.target.closest('#cancel-modal-btn') || e.target.id === 'cancel-modal-btn') return closeModal();
-                    
+
                     // Close modal when clicking on modal background
                     if (e.target.id === 'menstruation-modal') return closeModal();
                 });
@@ -2483,9 +2514,9 @@
                 document.addEventListener('click', (e) => {
                     const searchInput = document.getElementById('city-search-input');
                     const dropdown = document.getElementById('city-search-dropdown');
-                    
-                    if (searchInput && dropdown && 
-                        !searchInput.contains(e.target) && 
+
+                    if (searchInput && dropdown &&
+                        !searchInput.contains(e.target) &&
                         !dropdown.contains(e.target)) {
                         hideCityDropdown();
                     }
@@ -2552,10 +2583,10 @@
                 loadData();
                 applyTheme();
                 addGlobalEventListeners(); // Listeners are now added only once
-                
+
                 // Inisialisasi video random pertama kali
                 getRandomVideo();
-                
+
                 render();
 
                 // Load prayer times if not available
@@ -2569,4 +2600,5 @@
         });
     </script>
 </body>
+
 </html>

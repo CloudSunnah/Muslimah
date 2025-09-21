@@ -8284,7 +8284,7 @@
                     }
 
                     // Gunakan API aladhan dengan HTTPS
-                    const prayerUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20`;
+                    const prayerUrl = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20&tune=0,10,0,10,10,10,0,10,0`;
 
                     try {
                         const response = await fetch(prayerUrl);

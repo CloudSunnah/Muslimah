@@ -27,7 +27,6 @@ export default async function handler(request, response) {
 
   // Get the API key from Environment Variables configured in Vercel
   const apiKey = process.env.GEMINI_API_KEY;
-
   if (!apiKey) {
     // If the API key is not found, send an error
     return response.status(500).json({ error: 'API key is not configured.' });
@@ -56,6 +55,12 @@ export default async function handler(request, response) {
 
     // If successful, send the data from Gemini back to the frontend
     const data = await geminiResponse.json();
+
+    // --- LOGIKA CACHING DITAMBAHKAN DI SINI ---
+    // Memberi tahu Vercel untuk menyimpan jawaban ini di Edge selama 1 jam (3600 detik).
+    // Ini akan mengurangi beban kerja fungsi jika ada permintaan yang sama persis.
+    response.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=60');
+
     return response.status(200).json(data);
 
   } catch (error) {
@@ -63,4 +68,3 @@ export default async function handler(request, response) {
     return response.status(500).json({ error: 'An internal error occurred on the proxy server.' });
   }
 }
-

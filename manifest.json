@@ -8,6 +8,7 @@
   "short_name": "Muslimah App",
   "start_url": "/",
   "theme_color": "#ffffff",
+  "lang": "id",
   "id": "https://cloudsunnah.github.io/Muslimah/",
-  "description": "Aplikasi panduan untuk Muslimah berdasarkan Al-Qur'an dan Sunnah."
+  "description": "Aplikasi untuk muslimah dengan panduan Al-Qur'an dan Sunnah."
 }

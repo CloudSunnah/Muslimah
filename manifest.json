@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Muslimah App",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Muslimah App",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "https://cloudsunnah.github.io/Muslimah/",
+  "description": "Aplikasi panduan untuk Muslimah berdasarkan Al-Qur'an dan Sunnah."
+}

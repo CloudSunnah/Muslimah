@@ -1,9 +1,12 @@
 /**
  * Cloudflare Pages Function
- * Versi baru ini berfungsi sebagai proxy ke Cloudflare Workers AI, bukan lagi ke Gemini.
- * DITAMBAHKAN: parameter max_tokens untuk jawaban yang lebih panjang.
+ * This function acts as a secure proxy to the Gemini API.
+ * It's the equivalent of the Vercel function but adapted for the Cloudflare Workers runtime.
  */
 export async function onRequest(context) {
+  // `context` berisi request, environment variables (env), dll.
+
+  // --- START CORS FIX ---
   // Menangani preflight request (OPTIONS) untuk CORS
   if (context.request.method === 'OPTIONS') {
     return new Response(null, {
@@ -14,6 +17,7 @@ export async function onRequest(context) {
       },
     });
   }
+  // --- END CORS FIX ---
 
   // Hanya izinkan metode POST
   if (context.request.method !== 'POST') {
@@ -23,57 +27,52 @@ export async function onRequest(context) {
     });
   }
 
+  // Ambil API key dari Environment Variables yang diatur di Cloudflare
+  // Perhatikan: Caranya berbeda dari Vercel, di sini menggunakan `context.env`
+  const apiKey = context.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: 'API key is not configured.' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // URL Gemini API
+  const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
   try {
-    // Ambil body dari request frontend (yang masih dalam format Gemini)
-    const geminiRequestBody = await context.request.json();
+    // Ambil body dari request frontend
+    const requestBody = await context.request.json();
 
-    // --- TRANSFORMASI INPUT ---
-    const messages = [];
-    if (geminiRequestBody.systemInstruction && geminiRequestBody.systemInstruction.parts[0].text) {
-      messages.push({
-        role: 'system',
-        content: geminiRequestBody.systemInstruction.parts[0].text
-      });
-    }
-    if (geminiRequestBody.contents) {
-      geminiRequestBody.contents.forEach(content => {
-        messages.push({
-          role: content.role === 'model' ? 'assistant' : 'user',
-          content: content.parts[0].text
-        });
-      });
-    }
-
-    // --- PEMANGGILAN AI CLOUDFLARE DENGAN MAX_TOKENS ---
-    const aiResponse = await context.env.AI.run(
-      '@cf/meta/llama-3-8b-instruct',
-      {
-        messages: messages,
-        max_tokens: 1500 // INI ADALAH PERUBAHANNYA
-      }
-    );
+    // Teruskan request ke Gemini API
+    const geminiResponse = await fetch(geminiApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
     
-    // --- TRANSFORMASI OUTPUT ---
-    const geminiLikeResponse = {
-      candidates: [
-        {
-          content: {
-            parts: [
-              {
-                text: aiResponse.response || "Maaf, terjadi kesalahan dari AI."
-              }
-            ],
-            role: "model"
-          },
-        }
-      ]
-    };
+    // Jika Gemini error, teruskan errornya
+    if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        console.error("Gemini API Error:", errorText);
+        return new Response(JSON.stringify({ error: `API Error: ${geminiResponse.statusText}` }), {
+            status: geminiResponse.status,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
 
-    // Kirim kembali respons yang sudah diformat ke frontend
-    return new Response(JSON.stringify(geminiLikeResponse), {
+    // Jika berhasil, ambil data dan kirim kembali
+    const data = await geminiResponse.json();
+
+    // Buat respons baru untuk dikirim ke frontend
+    // Ini juga berbeda dari Vercel, kita membuat object `Response` baru
+    return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
+        // Tambahkan header CORS di sini juga untuk respons utama
         'Access-Control-Allow-Origin': '*',
       },
     });
@@ -82,10 +81,7 @@ export async function onRequest(context) {
     console.error('Proxy Error:', error);
     return new Response(JSON.stringify({ error: 'An internal error occurred.' }), {
       status: 500,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-       },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

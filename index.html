@@ -9531,27 +9531,81 @@
                 state.tanyaCloud.error = null;
                 render();
             };
-            const handleSendMessage = async () => {
-                const prompt = state.tanyaCloud.prompt.trim();
-                if (!prompt || state.tanyaCloud.isLoading) return;
+			const handleSendMessage = async () => {
+				const prompt = state.tanyaCloud.prompt.trim();
+				if (!prompt || state.tanyaCloud.isLoading) return;
 
-                playClickSound();
+				playClickSound();
 
-                state.tanyaCloud.messages.push({role: 'user', text: prompt});
-                state.tanyaCloud.prompt = '';
-                state.tanyaCloud.isLoading = true;
-                state.tanyaCloud.error = null;
-                render();
+				state.tanyaCloud.messages.push({role: 'user', text: prompt});
+				state.tanyaCloud.prompt = '';
+				state.tanyaCloud.isLoading = true;
+				state.tanyaCloud.error = null;
+				render();
 
-                if (!navigator.onLine) {
-                    state.tanyaCloud.messages.push({
-                        role: 'bot',
-                        text: 'Maaf, tidak ada koneksi internet. Silakan periksa koneksi Anda dan coba lagi.'
-                    });
-                    state.tanyaCloud.isLoading = false;
-                    render();
-                    return;
-                }
+				// Pastikan user sudah login
+				const user = auth.currentUser;
+				if (!user) {
+					state.tanyaCloud.messages.push({role: 'bot', text: 'Sesi Anda telah berakhir. Silakan muat ulang halaman dan login kembali.'});
+					state.tanyaCloud.isLoading = false;
+					render();
+					return;
+				}
+				
+				// Ambil ID Token pengguna untuk verifikasi di backend
+				const idToken = await user.getIdToken(true);
+
+				const apiUrl = '/proxy'; // URL proxy Anda
+
+				// Salin systemPrompt Anda yang relevan ke sini
+				const systemPrompt = 'Anda adalah \'Cloud Sunnah\', sebuah AI yang diprogram untuk menjadi asisten riset Islami...'; // Sesuaikan dengan prompt Anda
+
+				const contentsForAPI = state.tanyaCloud.messages.map(msg => ({
+					role: msg.role === 'bot' ? 'model' : 'user',
+					parts: [{text: msg.text}]
+				}));
+
+				const payload = {
+					contents: contentsForAPI,
+					systemInstruction: {parts: [{text: systemPrompt}]},
+				};
+
+				try {
+					const response = await fetch(apiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${idToken}` // INI PERUBAHAN PENTING: Mengirim token identitas
+						},
+						body: JSON.stringify(payload)
+					});
+
+					// Menangani error jika kuota harian pengguna habis
+					if (response.status === 429) { 
+						 state.tanyaCloud.messages.push({role: 'bot', text: 'Maaf, jatah panggilan AI Anda untuk hari ini sudah habis. Silakan coba lagi besok. Barakallahu fiik! 🙏'});
+						 state.tanyaCloud.isLoading = false;
+						 render();
+						 return;
+					}
+					
+					if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+
+					const result = await response.json();
+					const candidate = result.candidates?.[0];
+					const botMessage = candidate?.content?.parts?.[0]?.text || "Maaf, terjadi sedikit kendala. Coba beberapa saat lagi ya.";
+
+					state.tanyaCloud.messages.push({role: 'bot', text: botMessage});
+
+				} catch (err) {
+					console.error("Proxy or API Error:", err);
+					// Fallback jika terjadi error jaringan atau lainnya
+					const fallbackText = generateLocalResponse(prompt); 
+					state.tanyaCloud.messages.push({role: 'bot', text: fallbackText});
+				} finally {
+					state.tanyaCloud.isLoading = false;
+					render();
+				}
+			};
 
                 // URL API proxy
                 const apiUrl = 'https://muslimah.pages.dev/proxy';
